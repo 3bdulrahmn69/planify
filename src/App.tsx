@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
+import { AuthProvider } from './Context/FakeAuthContext';
 
 /* Components */
 import GoToTop from './components/GoToTop';
@@ -12,12 +13,14 @@ const LoginPage = lazy(() => import('./pages/LoginPage'));
 
 function App() {
   return (
-    <BrowserRouter>
-      <SuspenseWrapper>
-        <GoToTop />
-        <AppRoutes />
-      </SuspenseWrapper>
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <SuspenseWrapper>
+          <GoToTop />
+          <AppRoutes />
+        </SuspenseWrapper>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 

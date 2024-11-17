@@ -1,8 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../Context/FakeAuthContext';
 
 const LoginPage = () => {
   const [name, setName] = useState('Guest');
   const [error, setError] = useState('');
+
+  const { login, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -12,7 +17,13 @@ const LoginPage = () => {
       setError('Name is required.');
       return;
     }
+
+    login(name);
   }
+
+  useEffect(() => {
+    if (isAuthenticated) navigate('/app', { replace: true });
+  }, [isAuthenticated, navigate]);
 
   return (
     <main className="flex items-center justify-center min-h-screen bg-gray-100">

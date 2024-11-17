@@ -1,15 +1,19 @@
 import { useState, useEffect } from 'react';
 import { Link as ScrollLink } from 'react-scroll';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../Context/FakeAuthContext';
 
 import { FaBars, FaTimes } from 'react-icons/fa';
 
 import Logo from './Logo';
 import LoginBtn from './LoginBtn';
+import UserDropdown from './UserDropdown';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const { isAuthenticated } = useAuth();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -86,11 +90,19 @@ const Header = () => {
             {navItem.name}
           </ScrollLink>
         ))}
+        {isAuthenticated ? (
+          <Link
+            to="/app"
+            className="font-semibold hover:underline hover:underline-offset-4 cursor-pointer text-black"
+          >
+            Dashboard
+          </Link>
+        ) : null}
       </nav>
 
       {/* Login Button (right side) */}
       <div className="hidden md:block">
-        <LoginBtn />
+        {isAuthenticated ? <UserDropdown /> : <LoginBtn />}
       </div>
 
       {/* Hamburger Icon for Mobile */}
@@ -131,7 +143,7 @@ const Header = () => {
                 </li>
               ))}
               <li className="mt-6">
-                <LoginBtn />
+                {isAuthenticated ? <UserDropdown /> : <LoginBtn />}
               </li>
             </ul>
           </nav>
