@@ -8,6 +8,7 @@ import SpinnerFullPage from './components/SpinnerFullPage';
 /* Pages - Lazy Loaded */
 const HomePage = lazy(() => import('./pages/home/HomePage'));
 const NotFound = lazy(() => import('./pages/NotFound'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
 
 function App() {
   return (
@@ -27,6 +28,7 @@ const SuspenseWrapper: React.FC<{ children: React.ReactNode }> = ({
 const AppRoutes = () => (
   <Routes>
     <Route path="/" element={<HomePage />} />
+    <Route path="login" element={<LoginPage />} />
     <Route path="*" element={<NotFound />} />
   </Routes>
 );
