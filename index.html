@@ -5,10 +5,54 @@
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Planify</title>
+  <title>Planify - Your Personal Task Manager</title>
+
+  <!-- Meta Tags for SEO -->
+  <meta name="description"
+    content="Planify is your personal task manager that helps you organize your tasks efficiently. Start managing your time better with Planify." />
+  <meta name="keywords" content="task manager, productivity, planner, organize, Planify" />
+  <meta name="author" content="Your Name" />
+  <meta property="og:title" content="Planify - Your Personal Task Manager" />
+  <meta property="og:description"
+    content="Planify is your personal task manager that helps you organize your tasks efficiently." />
+  <meta property="og:image" content="/path/to/your/image.jpg" />
+  <meta property="og:url" content="https://yourwebsite.com" />
+  <meta property="og:type" content="website" />
+
+  <!-- Twitter Card Tags -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Planify - Your Personal Task Manager" />
+  <meta name="twitter:description"
+    content="Planify is your personal task manager that helps you organize your tasks efficiently." />
+  <meta name="twitter:image" content="/path/to/your/image.jpg" />
+
+  <!-- Structured Data for Search Engines -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Planify",
+      "url": "https://yourwebsite.com",
+      "description": "Your personal task manager for efficient organization and productivity.",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://yourwebsite.com/?s={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+  </script>
+
+  <!-- Performance Optimization: preload the main script -->
+  <link rel="preload" href="/src/main.tsx" as="script" />
+
 </head>
 
 <body>
+  <noscript>
+    <strong>We're sorry, but Planify doesn't work properly without JavaScript enabled. Please enable it to
+      continue.</strong>
+  </noscript>
+
   <div id="root"></div>
   <script type="module" src="/src/main.tsx"></script>
 </body>
