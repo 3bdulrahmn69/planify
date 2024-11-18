@@ -6,7 +6,10 @@ const DELETE_BOARD = 'DELETE_BOARD';
 const RENAME_BOARD = 'RENAME_BOARD';
 
 const initialState = {
-  boards: JSON.parse(localStorage.getItem('boards')) || [],
+  boards: (JSON.parse(localStorage.getItem('boards')) || []).map((board) => ({
+    ...board,
+    type: board.type, // Assign task type if missing
+  })),
 };
 
 const reducer = (state, action) => {
@@ -15,6 +18,7 @@ const reducer = (state, action) => {
       const newBoard = {
         id: uuidv4(),
         name: action.payload.name,
+        type: action.payload.type,
         date: `${new Date().toLocaleDateString()} - ${new Date().toLocaleTimeString()}`,
       };
       const updatedBoards = [...state.boards, newBoard];
@@ -35,17 +39,19 @@ const reducer = (state, action) => {
       };
     }
     case RENAME_BOARD: {
+      const updatedBoards = state.boards.map((board) =>
+        board.id === action.payload.id
+          ? {
+              ...board,
+              name: action.payload.newName,
+              date: `${new Date().toLocaleDateString()} - ${new Date().toLocaleTimeString()}`,
+            }
+          : board
+      );
+      localStorage.setItem('boards', JSON.stringify(updatedBoards)); // Sync to localStorage
       return {
         ...state,
-        boards: state.boards.map((board) =>
-          board.id === action.payload.id
-            ? {
-                ...board,
-                name: action.payload.newName,
-                date: `${new Date().toLocaleDateString()} - ${new Date().toLocaleTimeString()}`,
-              }
-            : board
-        ),
+        boards: updatedBoards,
       };
     }
     default:

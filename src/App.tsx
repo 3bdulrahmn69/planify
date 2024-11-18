@@ -13,6 +13,7 @@ const HomePage = lazy(() => import('./pages/home/HomePage'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const Dashboard = lazy(() => import('./pages/Board/Dashboard'));
+const Board = lazy(() => import('./pages/Board/Board'));
 
 function App() {
   return (
@@ -33,19 +34,31 @@ const SuspenseWrapper: React.FC<{ children: React.ReactNode }> = ({
 
 const AppRoutes = () => (
   <Routes>
+    {/* Public Routes */}
     <Route path="/" element={<HomePage />} />
     <Route path="login" element={<LoginPage />} />
+
+    {/* Protected Routes */}
     <Route
-      path="app"
+      path="app/*"
       element={
         <ProtectedRoutes>
           <DashboardProvider>
-            <Dashboard />
+            <AppProtectedRoutes />
           </DashboardProvider>
         </ProtectedRoutes>
       }
     />
+
+    {/* Catch-all route */}
     <Route path="*" element={<NotFound />} />
+  </Routes>
+);
+
+const AppProtectedRoutes = () => (
+  <Routes>
+    <Route path="" element={<Dashboard />} />
+    <Route path="board" element={<Board />} />
   </Routes>
 );
 

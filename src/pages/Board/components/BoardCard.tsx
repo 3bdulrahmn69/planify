@@ -9,14 +9,16 @@ import {
 import { Modal, ModalInput, ModalButton } from '../../../components/Modal';
 
 import { FaRegEdit, FaTrash } from 'react-icons/fa';
+import { MdDraw, MdTaskAlt } from 'react-icons/md';
 
 interface BoardCardProps {
   name: string;
   id: string;
-  date?: string;
+  type: string;
+  date: string;
 }
 
-const BoardCard = ({ name, id, date }: BoardCardProps) => {
+const BoardCard = ({ name, id, date, type }: BoardCardProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [tempBoardName, setTempBoardName] = useState(name);
   const [isBoardModalOpen, setIsBoardModalOpen] = useState(false);
@@ -67,7 +69,7 @@ const BoardCard = ({ name, id, date }: BoardCardProps) => {
 
       {/* Card Content */}
       <Link
-        to={`/app/${id}`}
+        to={`/app/board?id=${id}`}
         className="absolute inset-0 z-0 rounded-lg overflow-hidden"
         aria-label={`Navigate to board ${name}`}
       >
@@ -75,6 +77,13 @@ const BoardCard = ({ name, id, date }: BoardCardProps) => {
           <p className="text-2xl font-semibold text-gray-800">{name}</p>
           {date && <p className="text-xs text-gray-600">{date}</p>}
         </div>
+
+        {/* Board Icon */}
+        <div className="absolute bottom-4 left-4 flex items-center gap-2">
+          {type === 'draw' ? <MdDraw /> : <MdTaskAlt />}
+          <span className="text-sm text-gray-800">{type}</span>
+        </div>
+
         {/* Gradient Overlay */}
         <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-yellow-400 to-transparent" />
       </Link>
