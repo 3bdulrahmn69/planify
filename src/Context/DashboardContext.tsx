@@ -1,19 +1,31 @@
 import { createContext, useContext, useReducer, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
+/* Board Actions */
 const CREATE_BOARD = 'CREATE_BOARD';
 const DELETE_BOARD = 'DELETE_BOARD';
 const RENAME_BOARD = 'RENAME_BOARD';
+/* TaskBox Actions */
+const CREATE_TASK_BOX = 'CREATE_TASK_BOX';
+const DELETE_TASK_BOX = 'DELETE_TASK_BOX';
+const RENAME_TASK_BOX = 'RENAME_TASK_BOX';
+/* Task Actions */
+const CREATE_TASK = 'CREATE_TASK';
+const CHANGE_TASK_STATUS = 'CHANGE_TASK_STATUS';
+const DELETE_TASK = 'DELETE_TASK';
+const RENAME_TASK = 'RENAME_TASK';
+const MOVE_TASK = 'MOVE_TASK';
+const REORDER_TASKS = 'REORDER_TASKS';
 
 const initialState = {
-  boards: (JSON.parse(localStorage.getItem('boards')) || []).map((board) => ({
-    ...board,
-    type: board.type, // Assign task type if missing
-  })),
+  boards: JSON.parse(localStorage.getItem('boards')) || [],
+  taskBoxes: JSON.parse(localStorage.getItem('taskBoxes')) || [],
+  tasks: JSON.parse(localStorage.getItem('tasks')) || [],
 };
 
 const reducer = (state, action) => {
   switch (action.type) {
+    /* Board Actions */
     case CREATE_BOARD: {
       const newBoard = {
         id: uuidv4(),
@@ -52,6 +64,113 @@ const reducer = (state, action) => {
       return {
         ...state,
         boards: updatedBoards,
+      };
+    }
+    /* TaskBox Actions */
+    case CREATE_TASK_BOX: {
+      const newTaskBox = {
+        id: uuidv4(),
+        name: action.payload.name,
+        boardId: action.payload.boardId,
+      };
+      const updatedTaskBoxes = [...state.taskBoxes, newTaskBox];
+      localStorage.setItem('taskBoxes', JSON.stringify(updatedTaskBoxes)); // Update localStorage
+      return {
+        ...state,
+        taskBoxes: updatedTaskBoxes,
+      };
+    }
+    case DELETE_TASK_BOX: {
+      const updatedTaskBoxes = state.taskBoxes.filter(
+        (taskBox) => taskBox.id !== action.payload.id
+      );
+      localStorage.setItem('taskBoxes', JSON.stringify(updatedTaskBoxes)); // Update localStorage
+      return {
+        ...state,
+        taskBoxes: updatedTaskBoxes,
+      };
+    }
+    case RENAME_TASK_BOX: {
+      const updatedTaskBoxes = state.taskBoxes.map((taskBox) =>
+        taskBox.id === action.payload.id
+          ? { ...taskBox, name: action.payload.newName }
+          : taskBox
+      );
+      localStorage.setItem('taskBoxes', JSON.stringify(updatedTaskBoxes)); // Update localStorage
+      return {
+        ...state,
+        taskBoxes: updatedTaskBoxes,
+      };
+    }
+    /* Task Actions */
+    case CREATE_TASK: {
+      const newTask = {
+        id: uuidv4(),
+        title: action.payload.title,
+        boxId: action.payload.boxId,
+        status: 'pending',
+      };
+      const updatedTasks = [...state.tasks, newTask];
+      localStorage.setItem('tasks', JSON.stringify(updatedTasks)); // Update localStorage
+      return {
+        ...state,
+        tasks: updatedTasks,
+      };
+    }
+    case CHANGE_TASK_STATUS: {
+      const updatedTasks = state.tasks.map((task) =>
+        task.id === action.payload.taskId
+          ? { ...task, status: action.payload.newStatus }
+          : task
+      );
+      localStorage.setItem('tasks', JSON.stringify(updatedTasks)); // Update localStorage
+      return {
+        ...state,
+        tasks: updatedTasks,
+      };
+    }
+    case DELETE_TASK: {
+      const updatedTasks = state.tasks.filter(
+        (task) => task.id !== action.payload.taskId
+      );
+      localStorage.setItem('tasks', JSON.stringify(updatedTasks)); // Update localStorage
+      return {
+        ...state,
+        tasks: updatedTasks,
+      };
+    }
+    case RENAME_TASK: {
+      const updatedTasks = state.tasks.map((task) =>
+        task.id === action.payload.taskId
+          ? { ...task, title: action.payload.newTitle }
+          : task
+      );
+      localStorage.setItem('tasks', JSON.stringify(updatedTasks)); // Update localStorage
+      return {
+        ...state,
+        tasks: updatedTasks,
+      };
+    }
+    case MOVE_TASK: {
+      const updatedTasks = state.tasks.map((task) =>
+        task.id === action.payload.taskId
+          ? { ...task, boxId: action.payload.targetBoxId }
+          : task
+      );
+      localStorage.setItem('tasks', JSON.stringify(updatedTasks)); // Update localStorage
+      return {
+        ...state,
+        tasks: updatedTasks,
+      };
+    }
+    case REORDER_TASKS: {
+      const updatedTasks = [...state.tasks];
+      const [draggedItem] = updatedTasks.splice(action.payload.sourceIndex, 1);
+      updatedTasks.splice(action.payload.destinationIndex, 0, draggedItem);
+      localStorage.setItem('tasks', JSON.stringify(updatedTasks)); // Update localStorage
+      return {
+        ...state,
+        tasks: updatedTasks,
       };
     }
     default:

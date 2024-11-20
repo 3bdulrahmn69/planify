@@ -101,6 +101,8 @@ const BoardCard = ({ name, id, date, type }: BoardCardProps) => {
             setTempBoardName(e.target.value);
           }}
           onEnter={handleRenameBoard}
+          maxLength={25}
+          showCharCount={true}
         />
         <ModalButton
           onClick={handleRenameBoard}

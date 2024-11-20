@@ -34,33 +34,35 @@ const Dashboard = () => {
   };
 
   return (
-    <main className="relative min-h-screen w-full overflow-auto flex flex-col items-center">
+    <div className="relative min-h-screen w-full overflow-auto flex flex-col items-center">
       <BoardHeader />
-      <Section id="board-manger" className="mt-28">
-        <Title className="mb-4">Your Boards</Title>
-        <div className="flex flex-wrap gap-4">
-          {state.boards.length > 0 ? (
-            state.boards.map((board) => (
-              <BoardCard
-                key={board.id}
-                id={board.id}
-                name={board.name}
-                date={board.date}
-                type={board.type}
-              />
-            ))
-          ) : (
-            <div className="text-gray-500 text-lg w-full h-44 flex flex-col items-center justify-center">
-              <p>No boards found. Create one now!</p>
-              <CreateBtn
-                title="Create New Board"
-                onClick={() => setIsBoardModalOpen(true)}
-                className="mt-4 w-fit"
-              />
-            </div>
-          )}
-        </div>
-      </Section>
+      <main className="w-full">
+        <Section id="board-manger" className="mt-28">
+          <Title className="mb-4">Your Boards</Title>
+          <div className="flex flex-wrap gap-4">
+            {state.boards.length > 0 ? (
+              state.boards.map((board) => (
+                <BoardCard
+                  key={board.id}
+                  id={board.id}
+                  name={board.name}
+                  date={board.date}
+                  type={board.type}
+                />
+              ))
+            ) : (
+              <div className="text-gray-500 text-lg w-full h-44 flex flex-col items-center justify-center">
+                <p>No boards found. Create one now!</p>
+                <CreateBtn
+                  title="Create New Board"
+                  onClick={() => setIsBoardModalOpen(true)}
+                  className="mt-4 w-fit"
+                />
+              </div>
+            )}
+          </div>
+        </Section>
+      </main>
 
       <PlusButton
         title="Create New Board"
@@ -82,6 +84,8 @@ const Dashboard = () => {
             setTempBoardName(e.target.value);
           }}
           onEnter={handleCreateBoard}
+          maxLength={25}
+          showCharCount={true}
         />
 
         {/* Select Board Type */}
@@ -121,7 +125,7 @@ const Dashboard = () => {
           Save
         </ModalButton>
       </Modal>
-    </main>
+    </div>
   );
 };
 

@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
 import { AuthProvider } from './Context/FakeAuthContext';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 
 /* Components */
 import GoToTop from './components/GoToTop';
@@ -44,7 +46,9 @@ const AppRoutes = () => (
       element={
         <ProtectedRoutes>
           <DashboardProvider>
-            <AppProtectedRoutes />
+            <DndProvider backend={HTML5Backend}>
+              <AppProtectedRoutes />
+            </DndProvider>
           </DashboardProvider>
         </ProtectedRoutes>
       }

@@ -80,27 +80,48 @@ interface ModalInputProps {
   onEnter?: () => void;
   placeholder?: string;
   className?: string;
+  maxLength?: number; // New prop to set maximum character limit
+  showCharCount?: boolean; // Optional prop to display remaining characters
 }
 
 export const ModalInput = forwardRef<HTMLInputElement, ModalInputProps>(
   (
-    { value, onChange, onEnter, placeholder = 'Enter value', className },
+    {
+      value,
+      onChange,
+      onEnter,
+      placeholder = 'Enter value',
+      className,
+      maxLength,
+      showCharCount = false,
+    },
     ref
   ) => {
     return (
-      <input
-        type="text"
-        ref={ref}
-        className={cn(
-          'w-full p-2 border border-gray-200 rounded-md focus:border-blue-500 focus:outline-none transition-all',
-          className
+      <div className="relative w-full">
+        {/* Input Field */}
+        <input
+          type="text"
+          ref={ref}
+          maxLength={maxLength}
+          className={cn(
+            'w-full p-2 border border-gray-200 rounded-md focus:border-blue-500 focus:outline-none transition-all',
+            className
+          )}
+          placeholder={placeholder}
+          value={value}
+          onChange={onChange}
+          onKeyDown={(e) => e.key === 'Enter' && onEnter && onEnter()}
+          autoFocus={true}
+        />
+
+        {/* Character Count (optional) */}
+        {showCharCount && maxLength && (
+          <div className="absolute bottom-1 right-2 text-xs text-gray-500">
+            {value.length}/{maxLength}
+          </div>
         )}
-        placeholder={placeholder}
-        value={value}
-        onChange={onChange}
-        onKeyDown={(e) => e.key === 'Enter' && onEnter && onEnter()}
-        autoFocus={true}
-      />
+      </div>
     );
   }
 );
