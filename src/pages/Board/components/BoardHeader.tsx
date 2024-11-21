@@ -18,7 +18,7 @@ const BoardHeader: React.FC<BoardHeaderProps> = ({
   const navigate = useNavigate();
 
   return (
-    <header className="w-full max-w-4xl mt-4 p-4 flex justify-between items-center rounded-md shadow-md glass fixed">
+    <header className="w-full max-w-4xl mt-4 p-4 flex justify-between items-center rounded-md shadow-md glass fixed z-10">
       {variant === 'default' && (
         <>
           <Logo />

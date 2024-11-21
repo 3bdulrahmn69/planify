@@ -1,13 +1,14 @@
-import { useState } from 'react';
+import { useState, useMemo, lazy, Suspense } from 'react';
 import { useDashboardContext } from '../../Context/DashboardContext';
 import BoardHeader from './components/BoardHeader';
-import BoardCard from './components/BoardCard';
 import { Section, Title } from '../../components/Section';
 import { Modal, ModalButton, ModalInput } from '../../components/Modal';
 import PlusButton from '../../components/PlusButton';
 import CreateBtn from './components/CreateBtn';
 
 import { MdDraw, MdTaskAlt } from 'react-icons/md';
+
+const BoardCard = lazy(() => import('./components/BoardCard')); // Lazy load BoardCard
 
 const Dashboard = () => {
   const { state, dispatch } = useDashboardContext();
@@ -33,43 +34,66 @@ const Dashboard = () => {
     setBoardType('');
   };
 
+  const boards = useMemo(() => state.boards, [state.boards]);
+
   return (
-    <div className="relative min-h-screen w-full overflow-auto flex flex-col items-center">
+    <div className="relative flex flex-col items-center">
       <BoardHeader />
+
       <main className="w-full">
-        <Section id="board-manger" className="mt-28">
-          <Title className="mb-4">Your Boards</Title>
-          <div className="flex flex-wrap gap-4">
-            {state.boards.length > 0 ? (
-              state.boards.map((board) => (
-                <BoardCard
-                  key={board.id}
-                  id={board.id}
-                  name={board.name}
-                  date={board.date}
-                  type={board.type}
-                />
-              ))
-            ) : (
-              <div className="text-gray-500 text-lg w-full h-44 flex flex-col items-center justify-center">
-                <p>No boards found. Create one now!</p>
-                <CreateBtn
-                  title="Create New Board"
-                  onClick={() => setIsBoardModalOpen(true)}
-                  className="mt-4 w-fit"
-                />
-              </div>
-            )}
+        <Section
+          id="board-manager"
+          className="mt-24 flex flex-col items-center w-full px-4 sm:px-8"
+        >
+          <Title className="mb-6 text-center text-xl sm:text-2xl lg:text-3xl">
+            Your Boards
+          </Title>
+
+          <div
+            className={`w-full max-w-7xl flex flex-wrap justify-start gap-6 ${
+              boards.length > 0 ? '' : 'items-center justify-center'
+            }`}
+          >
+            <Suspense
+              fallback={
+                <div className="text-center col-span-full">
+                  <p>Loading boards...</p>
+                </div>
+              }
+            >
+              {boards.length > 0 ? (
+                boards.map((board) => (
+                  <BoardCard
+                    key={board.id}
+                    id={board.id}
+                    name={board.name}
+                    date={board.date}
+                    type={board.type}
+                  />
+                ))
+              ) : (
+                <div className="mt-24 text-gray-500 text-lg flex flex-col items-center justify-center">
+                  <p>No boards found. Create one now!</p>
+                  <CreateBtn
+                    title="Create New Board"
+                    onClick={() => setIsBoardModalOpen(true)}
+                    className="mt-4 w-fit"
+                  />
+                </div>
+              )}
+            </Suspense>
           </div>
         </Section>
       </main>
 
-      <PlusButton
-        title="Create New Board"
-        onClick={() => setIsBoardModalOpen(true)}
-        className="fixed bottom-8 right-8"
-        size="large"
-      />
+      {boards.length > 0 && (
+        <PlusButton
+          title="Create New Board"
+          onClick={() => setIsBoardModalOpen(true)}
+          className="fixed bottom-8 right-8 sm:bottom-12 sm:right-12"
+          size="large"
+        />
+      )}
 
       {/* Modals */}
       <Modal
@@ -80,19 +104,17 @@ const Dashboard = () => {
         <ModalInput
           value={tempBoardName}
           placeholder="Enter new board name"
-          onChange={(e) => {
-            setTempBoardName(e.target.value);
-          }}
+          onChange={(e) => setTempBoardName(e.target.value)}
           onEnter={handleCreateBoard}
           maxLength={25}
           showCharCount={true}
         />
 
         {/* Select Board Type */}
-        <div className="flex justify-center items-center gap-4 mt-4">
+        <div className="flex flex-wrap justify-center items-center gap-4 mt-4">
           {/* Task Type */}
           <div
-            className={`w-1/2 p-4 border-2 rounded-lg flex flex-col items-center cursor-pointer transition ${
+            className={`w-5/12 p-4 border-2 rounded-lg flex flex-col items-center cursor-pointer transition ${
               boardType === 'task'
                 ? 'border-blue-500 bg-blue-100'
                 : 'border-gray-300'
@@ -105,7 +127,7 @@ const Dashboard = () => {
 
           {/* Draw Type */}
           <div
-            className={`w-1/2 p-4 border-2 rounded-lg flex flex-col items-center cursor-pointer transition ${
+            className={`w-5/12 p-4 border-2 rounded-lg flex flex-col items-center cursor-pointer transition ${
               boardType === 'draw'
                 ? 'border-blue-500 bg-blue-100'
                 : 'border-gray-300'
@@ -120,7 +142,7 @@ const Dashboard = () => {
         <ModalButton
           onClick={handleCreateBoard}
           disabled={!tempBoardName.trim() || !boardType.trim()}
-          className="w-full mt-4 p-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
+          className="w-full mt-6 p-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Save
         </ModalButton>

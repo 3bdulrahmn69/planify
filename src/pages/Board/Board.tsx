@@ -61,76 +61,86 @@ const Board = () => {
           setIsRenameModalOpen(true);
         }}
       />
-      <main className="mt-28 w-full">
-        <TaskBoard>
-          {state.taskBoxes
-            .filter((taskBox) => taskBox.boardId === id)
-            .map((taskBox) => (
-              <TasksBox
-                key={taskBox.id}
-                id={taskBox.id}
-                title={taskBox.name}
-                items={state.tasks.filter((task) => task.boxId === taskBox.id)}
+      <main className="mt-28 w-full flex justify-center">
+        {board.type === 'task' && (
+          <TaskBoard>
+            {state.taskBoxes
+              .filter((taskBox) => taskBox.boardId === id)
+              .map((taskBox) => (
+                <TasksBox
+                  key={taskBox.id}
+                  id={taskBox.id}
+                  title={taskBox.name}
+                  items={state.tasks.filter(
+                    (task) => task.boxId === taskBox.id
+                  )}
+                />
+              ))}
+
+            <PlusButton
+              title="Create New Board"
+              onClick={() => setIsBoardModalOpen(true)}
+              className="fixed bottom-8 right-8"
+              size="large"
+            />
+
+            {/* Modals */}
+            <Modal
+              title="Create New Task Box"
+              isOpen={isBoardModalOpen}
+              onClose={handleCloseBoardModal}
+            >
+              <ModalInput
+                value={tempTaskBoxName}
+                placeholder="Enter task box name"
+                onChange={(e) => {
+                  setTaskBoxName(e.target.value);
+                }}
+                onEnter={handleCreateTaskBox}
+                maxLength={25}
+                showCharCount={true}
               />
-            ))}
+              <ModalButton
+                onClick={handleCreateTaskBox}
+                disabled={!tempTaskBoxName.trim()}
+                className="w-full mt-4 p-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
+              >
+                Save
+              </ModalButton>
+            </Modal>
+          </TaskBoard>
+        )}
 
-          <PlusButton
-            title="Create New Board"
-            onClick={() => setIsBoardModalOpen(true)}
-            className="fixed bottom-8 right-8"
-            size="large"
-          />
-
-          {/* Modals */}
-          <Modal
-            title="Create New Task Box"
-            isOpen={isBoardModalOpen}
-            onClose={handleCloseBoardModal}
-          >
-            <ModalInput
-              value={tempTaskBoxName}
-              placeholder="Enter task box name"
-              onChange={(e) => {
-                setTaskBoxName(e.target.value);
-              }}
-              onEnter={handleCreateTaskBox}
-              maxLength={25}
-              showCharCount={true}
-            />
-            <ModalButton
-              onClick={handleCreateTaskBox}
-              disabled={!tempTaskBoxName.trim()}
-              className="w-full mt-4 p-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
-            >
-              Save
-            </ModalButton>
-          </Modal>
-
-          <Modal
-            title="Rename Board"
-            isOpen={isRenameModalOpen}
-            onClose={handleCloseRenameModal}
-          >
-            <ModalInput
-              value={tempBoardName}
-              placeholder="Enter new board name"
-              onChange={(e) => {
-                setTempBoardName(e.target.value);
-              }}
-              onEnter={handleRenameBoard}
-              maxLength={25}
-              showCharCount={true}
-            />
-            <ModalButton
-              onClick={handleRenameBoard}
-              disabled={!tempBoardName.trim()}
-              className="w-full mt-4 p-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
-            >
-              Save
-            </ModalButton>
-          </Modal>
-        </TaskBoard>
+        {board.type === 'draw' && (
+          <TaskBoard className="w-full">
+            <h1 className="text-4xl text-center">Draw</h1>
+          </TaskBoard>
+        )}
       </main>
+
+      <Modal
+        title="Rename Board"
+        isOpen={isRenameModalOpen}
+        onClose={handleCloseRenameModal}
+      >
+        <ModalInput
+          value={tempBoardName}
+          placeholder="Enter new board name"
+          onChange={(e) => {
+            setTempBoardName(e.target.value);
+          }}
+          onEnter={handleRenameBoard}
+          maxLength={25}
+          showCharCount={true}
+        />
+        <ModalButton
+          onClick={handleRenameBoard}
+          disabled={!tempBoardName.trim()}
+          className="w-full mt-4 p-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
+        >
+          Save
+        </ModalButton>
+      </Modal>
     </div>
   );
 };

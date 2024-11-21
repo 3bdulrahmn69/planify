@@ -39,7 +39,7 @@ const BoardCard = ({ name, id, date, type }: BoardCardProps) => {
   };
 
   return (
-    <div className="relative h-48 w-96 rounded-lg bg-yellow-300 shadow-md hover:shadow-lg transition-transform duration-300 ease-in-out transform hover:scale-105 overflow-hidden">
+    <div className="relative h-56 w-full max-w-md sm:w-96 rounded-lg bg-gradient-to-br from-yellow-300 to-yellow-400 shadow-lg hover:shadow-2xl transition-transform duration-300 ease-in-out transform hover:scale-105 overflow-hidden">
       {/* Dropdown Button */}
       <DropdownButton
         isMenuOpen={isMenuOpen}
@@ -55,7 +55,7 @@ const BoardCard = ({ name, id, date, type }: BoardCardProps) => {
           onClose={() => setIsMenuOpen(false)}
         >
           <FaRegEdit />
-          <span>Edit</span>
+          <span>Rename</span>
         </DropdownItem>
         <DropdownItem
           onClick={handleDeleteBoard}
@@ -70,22 +70,31 @@ const BoardCard = ({ name, id, date, type }: BoardCardProps) => {
       {/* Card Content */}
       <Link
         to={`/app/board?id=${id}`}
-        className="absolute inset-0 z-0 rounded-lg overflow-hidden"
+        className="absolute inset-0 z-0 flex flex-col justify-between p-4 rounded-lg overflow-hidden transition-opacity group hover:opacity-90"
         aria-label={`Navigate to board ${name}`}
       >
-        <div className="h-full w-full flex items-center justify-center flex-col transition-opacity group-hover:opacity-80 p-4">
-          <p className="text-2xl font-semibold text-gray-800">{name}</p>
-          {date && <p className="text-xs text-gray-600">{date}</p>}
+        <div>
+          <p className="text-lg sm:text-2xl font-semibold text-gray-800 truncate">
+            {name}
+          </p>
+          {date && (
+            <p className="text-sm sm:text-base text-gray-700 mt-1">{date}</p>
+          )}
         </div>
 
-        {/* Board Icon */}
-        <div className="absolute bottom-4 left-4 flex items-center gap-2">
-          {type === 'draw' ? <MdDraw /> : <MdTaskAlt />}
-          <span className="text-sm text-gray-800">{type}</span>
+        <div className="flex items-center gap-2 mt-4">
+          {type === 'draw' ? (
+            <MdDraw className="text-2xl text-gray-800" />
+          ) : (
+            <MdTaskAlt className="text-2xl text-gray-800" />
+          )}
+          <span className="text-sm sm:text-base text-gray-800 capitalize">
+            {type}
+          </span>
         </div>
 
         {/* Gradient Overlay */}
-        <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-yellow-400 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-yellow-500 to-transparent opacity-80" />
       </Link>
 
       {/* Rename Modal */}

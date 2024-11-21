@@ -1,5 +1,6 @@
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
+import GoToTop from '../../components/GoToTop';
 
 import HeroSection from './HeroSection';
 import AboutSection from './AboutSection';
@@ -19,6 +20,7 @@ const HomePage = () => {
         <FrequentlySection />
       </main>
       <Footer />
+      <GoToTop />
     </>
   );
 };

@@ -5,7 +5,6 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 
 /* Components */
-import GoToTop from './components/GoToTop';
 import SpinnerFullPage from './components/SpinnerFullPage';
 import ProtectedRoutes from './components/ProtectedRoutes';
 import { DashboardProvider } from './Context/DashboardContext';
@@ -22,7 +21,6 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <SuspenseWrapper>
-          <GoToTop />
           <AppRoutes />
         </SuspenseWrapper>
       </BrowserRouter>

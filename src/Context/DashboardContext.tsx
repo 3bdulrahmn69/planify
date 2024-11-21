@@ -41,13 +41,35 @@ const reducer = (state, action) => {
       };
     }
     case DELETE_BOARD: {
-      const updatedBoards = state.boards.filter(
-        (board) => board.id !== action.payload.id
+      // Delete task boxes related to the board
+      const updatedTaskBoxes = state.taskBoxes.filter(
+        (taskBox) => taskBox.boardId !== action.payload.id
       );
-      localStorage.setItem('boards', JSON.stringify(updatedBoards)); // Update localStorage
+
+      // Delete tasks related to the deleted task boxes
+      const taskBoxesToDelete = state.taskBoxes
+        .filter((taskBox) => taskBox.boardId === action.payload.id)
+        .map((taskBox) => taskBox.id);
+
+      const updatedTasks = state.tasks.filter(
+        (task) => !taskBoxesToDelete.includes(task.boxId)
+      );
+
+      // Update localStorage for boards, taskBoxes, and tasks
+      localStorage.setItem(
+        'boards',
+        JSON.stringify(
+          state.boards.filter((board) => board.id !== action.payload.id)
+        )
+      );
+      localStorage.setItem('taskBoxes', JSON.stringify(updatedTaskBoxes));
+      localStorage.setItem('tasks', JSON.stringify(updatedTasks));
+
       return {
         ...state,
-        boards: updatedBoards,
+        boards: state.boards.filter((board) => board.id !== action.payload.id),
+        taskBoxes: updatedTaskBoxes,
+        tasks: updatedTasks,
       };
     }
     case RENAME_BOARD: {
@@ -81,13 +103,26 @@ const reducer = (state, action) => {
       };
     }
     case DELETE_TASK_BOX: {
+      // Delete tasks associated with the task box
+      const updatedTasks = state.tasks.filter(
+        (task) => task.boxId !== action.payload.id
+      );
+
+      // Update localStorage for tasks
+      localStorage.setItem('tasks', JSON.stringify(updatedTasks));
+
+      // Remove the task box itself
       const updatedTaskBoxes = state.taskBoxes.filter(
         (taskBox) => taskBox.id !== action.payload.id
       );
-      localStorage.setItem('taskBoxes', JSON.stringify(updatedTaskBoxes)); // Update localStorage
+
+      // Update localStorage for task boxes
+      localStorage.setItem('taskBoxes', JSON.stringify(updatedTaskBoxes));
+
       return {
         ...state,
         taskBoxes: updatedTaskBoxes,
+        tasks: updatedTasks,
       };
     }
     case RENAME_TASK_BOX: {
