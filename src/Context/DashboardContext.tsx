@@ -18,12 +18,43 @@ const MOVE_TASK = 'MOVE_TASK';
 const REORDER_TASKS = 'REORDER_TASKS';
 
 const initialState = {
-  boards: JSON.parse(localStorage.getItem('boards')) || [],
-  taskBoxes: JSON.parse(localStorage.getItem('taskBoxes')) || [],
-  tasks: JSON.parse(localStorage.getItem('tasks')) || [],
+  boards: JSON.parse(localStorage.getItem('boards') || '[]'),
+  taskBoxes: JSON.parse(localStorage.getItem('taskBoxes') || '[]'),
+  tasks: JSON.parse(localStorage.getItem('tasks') || '[]'),
 };
 
-const reducer = (state, action) => {
+interface Action {
+  type: string;
+  payload: any;
+}
+
+interface State {
+  boards: Board[];
+  taskBoxes: TaskBox[];
+  tasks: Task[];
+}
+
+interface Board {
+  id: string;
+  name: string;
+  type: string;
+  date: string;
+}
+
+interface TaskBox {
+  id: string;
+  name: string;
+  boardId: string;
+}
+
+interface Task {
+  id: string;
+  title: string;
+  boxId: string;
+  status: string;
+}
+
+const reducer = (state: State, action: Action): State => {
   switch (action.type) {
     /* Board Actions */
     case CREATE_BOARD: {
@@ -41,35 +72,13 @@ const reducer = (state, action) => {
       };
     }
     case DELETE_BOARD: {
-      // Delete task boxes related to the board
-      const updatedTaskBoxes = state.taskBoxes.filter(
-        (taskBox) => taskBox.boardId !== action.payload.id
+      const updatedBoards = state.boards.filter(
+        (board) => board.id !== action.payload.id
       );
-
-      // Delete tasks related to the deleted task boxes
-      const taskBoxesToDelete = state.taskBoxes
-        .filter((taskBox) => taskBox.boardId === action.payload.id)
-        .map((taskBox) => taskBox.id);
-
-      const updatedTasks = state.tasks.filter(
-        (task) => !taskBoxesToDelete.includes(task.boxId)
-      );
-
-      // Update localStorage for boards, taskBoxes, and tasks
-      localStorage.setItem(
-        'boards',
-        JSON.stringify(
-          state.boards.filter((board) => board.id !== action.payload.id)
-        )
-      );
-      localStorage.setItem('taskBoxes', JSON.stringify(updatedTaskBoxes));
-      localStorage.setItem('tasks', JSON.stringify(updatedTasks));
-
+      localStorage.setItem('boards', JSON.stringify(updatedBoards)); // Update localStorage
       return {
         ...state,
-        boards: state.boards.filter((board) => board.id !== action.payload.id),
-        taskBoxes: updatedTaskBoxes,
-        tasks: updatedTasks,
+        boards: updatedBoards,
       };
     }
     case RENAME_BOARD: {
@@ -103,26 +112,13 @@ const reducer = (state, action) => {
       };
     }
     case DELETE_TASK_BOX: {
-      // Delete tasks associated with the task box
-      const updatedTasks = state.tasks.filter(
-        (task) => task.boxId !== action.payload.id
-      );
-
-      // Update localStorage for tasks
-      localStorage.setItem('tasks', JSON.stringify(updatedTasks));
-
-      // Remove the task box itself
       const updatedTaskBoxes = state.taskBoxes.filter(
         (taskBox) => taskBox.id !== action.payload.id
       );
-
-      // Update localStorage for task boxes
-      localStorage.setItem('taskBoxes', JSON.stringify(updatedTaskBoxes));
-
+      localStorage.setItem('taskBoxes', JSON.stringify(updatedTaskBoxes)); // Update localStorage
       return {
         ...state,
         taskBoxes: updatedTaskBoxes,
-        tasks: updatedTasks,
       };
     }
     case RENAME_TASK_BOX: {
