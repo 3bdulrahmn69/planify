@@ -42,7 +42,7 @@ const Board = () => {
   };
 
   const handleRenameBoard = () => {
-    if (tempBoardName.trim()) {
+    if (tempBoardName?.trim()) {
       dispatch({
         type: 'RENAME_BOARD',
         payload: { id, newName: tempBoardName.trim() },
@@ -62,7 +62,7 @@ const Board = () => {
         }}
       />
       <main className="mt-28 w-full flex justify-center">
-        {board.type === 'task' && (
+        {board?.type === 'task' && (
           <TaskBoard>
             {state.taskBoxes
               .filter((taskBox) => taskBox.boardId === id)
@@ -111,7 +111,7 @@ const Board = () => {
           </TaskBoard>
         )}
 
-        {board.type === 'draw' && (
+        {board?.type === 'draw' && (
           <TaskBoard className="w-full">
             <h1 className="text-4xl text-center">Draw</h1>
           </TaskBoard>
@@ -124,7 +124,7 @@ const Board = () => {
         onClose={handleCloseRenameModal}
       >
         <ModalInput
-          value={tempBoardName}
+          value={tempBoardName || ''}
           placeholder="Enter new board name"
           onChange={(e) => {
             setTempBoardName(e.target.value);
@@ -135,7 +135,7 @@ const Board = () => {
         />
         <ModalButton
           onClick={handleRenameBoard}
-          disabled={!tempBoardName.trim()}
+          disabled={!tempBoardName?.trim()}
           className="w-full mt-4 p-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
         >
           Save
