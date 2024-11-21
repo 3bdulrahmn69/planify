@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <link rel="icon" type="image/png" href="/logo.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Planify - Your Personal Task Manager</title>
 
@@ -15,16 +15,16 @@
   <meta property="og:title" content="Planify - Your Personal Task Manager" />
   <meta property="og:description"
     content="Planify is your personal task manager that helps you organize your tasks efficiently." />
-  <meta property="og:image" content="/path/to/your/image.jpg" />
-  <meta property="og:url" content="https://yourwebsite.com" />
+  <meta property="og:image" content="https://raw.githubusercontent.com/3bdulrahmn69/planify/public/home.png" />
+  <meta property="og:url" content="https://3bdulrahmn69-planify.netlify.app/" />
   <meta property="og:type" content="website" />
 
   <!-- Twitter Card Tags -->
-  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:card" content="https://raw.githubusercontent.com/3bdulrahmn69/planify/public/home.png" />
   <meta name="twitter:title" content="Planify - Your Personal Task Manager" />
   <meta name="twitter:description"
     content="Planify is your personal task manager that helps you organize your tasks efficiently." />
-  <meta name="twitter:image" content="/path/to/your/image.jpg" />
+  <meta name="twitter:image" content="https://raw.githubusercontent.com/3bdulrahmn69/planify/public/logo.png" />
 
   <!-- Structured Data for Search Engines -->
   <script type="application/ld+json">
@@ -32,15 +32,45 @@
       "@context": "https://schema.org",
       "@type": "WebSite",
       "name": "Planify",
-      "url": "https://yourwebsite.com",
-      "description": "Your personal task manager for efficient organization and productivity.",
+      "url": "https://3bdulrahmn69-planify.netlify.app/",
+      "description": "Planify is a versatile task management platform designed to streamline workflows, organize tasks, and enhance productivity. Inspired by tools like Trello, it offers task boards, customizable workflows, and drag-and-drop functionality.",
+      "keywords": [
+        "task management",
+        "productivity tool",
+        "drag-and-drop tasks",
+        "task boards",
+        "task organizer",
+        "workflow management",
+        "drag-and-drop",
+        "drawing board",
+      ],
+      "inLanguage": "en",
+      "creator": {
+        "@type": "Person",
+        "name": "Abdulrahman Moussa",
+        "url": "https://github.com/3bdulrahmn69"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Abdulrahman Moussa",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://raw.githubusercontent.com/3bdulrahmn69/planify/public/logo.png",
+          "width": 512,
+          "height": 512
+        }
+      },
       "potentialAction": {
         "@type": "SearchAction",
-        "target": "https://yourwebsite.com/?s={search_term_string}",
+        "target": "https://3bdulrahmn69-planify.netlify.app/?s={search_term_string}",
         "query-input": "required name=search_term_string"
+      },
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://3bdulrahmn69-planify.netlify.app/"
       }
     }
-  </script>
+    </script>
 
   <!-- Performance Optimization: preload the main script -->
   <link rel="preload" href="/src/main.tsx" as="script" />
