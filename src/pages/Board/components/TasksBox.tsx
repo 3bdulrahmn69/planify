@@ -12,25 +12,19 @@ import { HiOutlineDotsVertical } from 'react-icons/hi';
 import { FaRegEdit, FaTrash } from 'react-icons/fa';
 import TaskItem from './TaskItem';
 
-interface Task {
-  id: string;
-  title: string;
-  status: string;
-}
-
 interface TasksBoxProps {
   id: string;
   title: string;
-  items: Task[];
 }
 
-const TasksBox = ({ id, title, items }: TasksBoxProps) => {
+const TasksBox = ({ id, title }: TasksBoxProps) => {
+  const { state, dispatch } = useDashboardContext();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
   const [newTitle, setNewTitle] = useState(title);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [taskTitle, setTaskTitle] = useState('');
-  const { dispatch } = useDashboardContext();
+  const tasks = state.tasks.filter((task) => task.boxId === id);
 
   const [{ isOver }, drop] = useDrop({
     accept: itemTypes.TASK,
@@ -100,14 +94,14 @@ const TasksBox = ({ id, title, items }: TasksBoxProps) => {
       )}
 
       <div className="p-2">
-        {items.map((item, idx) => (
+        {tasks.map((task, idx) => (
           <TaskItem
-            key={item.id}
+            key={task.id}
             boxId={id}
-            id={item.id}
-            title={item.title}
-            status={item.status}
-            index={idx}
+            id={task.id}
+            title={task.title}
+            status={task.status}
+            order={idx}
           />
         ))}
       </div>

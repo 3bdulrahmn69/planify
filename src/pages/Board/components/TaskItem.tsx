@@ -12,10 +12,10 @@ interface TaskProps {
   id: string;
   title: string;
   status: string;
-  index: number; // Add index to track task position
+  order: number; // Add index to track task position
 }
 
-const TaskItem = ({ boxId, id, title, status, index }: TaskProps) => {
+const TaskItem = ({ boxId, id, title, status, order }: TaskProps) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
   const [newTitle, setNewTitle] = useState(title);
@@ -26,7 +26,7 @@ const TaskItem = ({ boxId, id, title, status, index }: TaskProps) => {
   // Drag configuration for DnD
   const [{ isDragging }, drag] = useDrag({
     type: itemTypes.TASK,
-    item: { id, boxId, index },
+    item: { id, boxId, order },
     collect: (monitor) => ({
       isDragging: !!monitor.isDragging(),
     }),
@@ -35,17 +35,17 @@ const TaskItem = ({ boxId, id, title, status, index }: TaskProps) => {
   // Drop configuration to reorder tasks within the same box
   const [, drop] = useDrop({
     accept: itemTypes.TASK,
-    hover: (draggedItem: { id: string; boxId: string; index: number }) => {
+    hover: (draggedItem: { id: string; boxId: string; order: number }) => {
       if (draggedItem.id !== id && draggedItem.boxId === boxId) {
         dispatch({
           type: 'REORDER_TASKS',
           payload: {
             boxId,
-            sourceIndex: draggedItem.index,
-            destinationIndex: index,
+            sourceIndex: draggedItem.order,
+            destinationIndex: order,
           },
         });
-        draggedItem.index = index; // Update dragged item’s index after reorder
+        draggedItem.order = order; // Update dragged item’s order after reorder
       }
     },
   });

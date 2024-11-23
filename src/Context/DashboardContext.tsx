@@ -7,6 +7,9 @@ import {
 } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
+/* Interfaces */
+import { Board, TaskBox, Task } from '../lib/interfaces';
+
 /* Board Actions */
 const CREATE_BOARD = 'CREATE_BOARD';
 const DELETE_BOARD = 'DELETE_BOARD';
@@ -22,26 +25,6 @@ const DELETE_TASK = 'DELETE_TASK';
 const RENAME_TASK = 'RENAME_TASK';
 const MOVE_TASK = 'MOVE_TASK';
 const REORDER_TASKS = 'REORDER_TASKS';
-
-interface Board {
-  id: string;
-  name: string;
-  type: string;
-  date: string;
-}
-
-interface TaskBox {
-  id: string;
-  name: string;
-  boardId: string;
-}
-
-interface Task {
-  id: string;
-  title: string;
-  boxId: string;
-  status: string;
-}
 
 interface State {
   boards: Board[];
@@ -169,6 +152,8 @@ const reducer = (state: State, action: Action): State => {
         title: action.payload.title,
         boxId: action.payload.boxId,
         status: 'pending',
+        order: state.tasks.filter((task) => task.boxId === action.payload.boxId)
+          .length,
       };
       const updatedTasks = [...state.tasks, newTask];
       localStorage.setItem('tasks', JSON.stringify(updatedTasks));
@@ -200,12 +185,25 @@ const reducer = (state: State, action: Action): State => {
       return { ...state, tasks: updatedTasks };
     }
     case MOVE_TASK: {
+      // Check if the task is already in the target box
+      const taskToMove = state.tasks.find(
+        (task) => task.id === action.payload.taskId
+      );
+      if (taskToMove && taskToMove.boxId === action.payload.targetBoxId) {
+        return state;
+      }
+
+      // Update the task's box ID
       const updatedTasks = state.tasks.map((task) =>
         task.id === action.payload.taskId
           ? { ...task, boxId: action.payload.targetBoxId }
           : task
       );
+
+      // Save updated tasks to localStorage
       localStorage.setItem('tasks', JSON.stringify(updatedTasks));
+
+      // Return updated state
       return { ...state, tasks: updatedTasks };
     }
     case REORDER_TASKS: {

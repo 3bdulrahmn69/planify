@@ -71,9 +71,6 @@ const Board = () => {
                   key={taskBox.id}
                   id={taskBox.id}
                   title={taskBox.name}
-                  items={state.tasks.filter(
-                    (task) => task.boxId === taskBox.id
-                  )}
                 />
               ))}
 
