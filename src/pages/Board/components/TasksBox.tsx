@@ -94,16 +94,19 @@ const TasksBox = ({ id, title }: TasksBoxProps) => {
       )}
 
       <div className="p-2">
-        {tasks.map((task, idx) => (
-          <TaskItem
-            key={task.id}
-            boxId={id}
-            id={task.id}
-            title={task.title}
-            status={task.status}
-            order={idx}
-          />
-        ))}
+        {tasks
+          .slice() // Create a shallow copy to avoid mutating the original array
+          .sort((a, b) => a.order - b.order) // Sort by the order property
+          .map((task) => (
+            <TaskItem
+              key={task.id}
+              boxId={id}
+              id={task.id}
+              title={task.title}
+              status={task.status}
+              order={task.order}
+            />
+          ))}
       </div>
 
       <button className="absolute top-2 right-1" onClick={openDropdown}>

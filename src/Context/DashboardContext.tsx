@@ -185,31 +185,69 @@ const reducer = (state: State, action: Action): State => {
       return { ...state, tasks: updatedTasks };
     }
     case MOVE_TASK: {
-      // Check if the task is already in the target box
-      const taskToMove = state.tasks.find(
-        (task) => task.id === action.payload.taskId
-      );
-      if (taskToMove && taskToMove.boxId === action.payload.targetBoxId) {
+      const { taskId, targetBoxId } = action.payload;
+
+      // Find the task to move
+      const taskToMove = state.tasks.find((task) => task.id === taskId);
+
+      if (!taskToMove) {
+        console.error('Task not found');
         return state;
       }
 
-      // Update the task's box ID
-      const updatedTasks = state.tasks.map((task) =>
-        task.id === action.payload.taskId
-          ? { ...task, boxId: action.payload.targetBoxId }
-          : task
-      );
+      // If the target box is the same as the current box, do nothing
+      if (taskToMove.boxId === targetBoxId) {
+        return state;
+      }
 
-      // Save updated tasks to localStorage
+      // Update tasks
+      const updatedTasks = state.tasks.map((task) => {
+        if (task.id === taskId) {
+          // Move the task to the target box and assign the next order
+          return {
+            ...task,
+            boxId: targetBoxId,
+            order: state.tasks.filter((t) => t.boxId === targetBoxId).length,
+          };
+        }
+
+        // Re-index tasks in the source box
+        if (task.boxId === taskToMove.boxId) {
+          return {
+            ...task,
+            order: state.tasks
+              .filter((t) => t.boxId === task.boxId && t.id !== taskId)
+              .sort((a, b) => a.order - b.order)
+              .findIndex((t) => t.id === task.id),
+          };
+        }
+
+        return task;
+      });
+
       localStorage.setItem('tasks', JSON.stringify(updatedTasks));
-
-      // Return updated state
       return { ...state, tasks: updatedTasks };
     }
     case REORDER_TASKS: {
-      const updatedTasks = [...state.tasks];
-      const [draggedItem] = updatedTasks.splice(action.payload.sourceIndex, 1);
-      updatedTasks.splice(action.payload.destinationIndex, 0, draggedItem);
+      const { boxId, sourceIndex, destinationIndex } = action.payload;
+
+      // Filter and reorder tasks in the same box
+      const tasksInBox = state.tasks.filter((task) => task.boxId === boxId);
+      const [movedTask] = tasksInBox.splice(sourceIndex, 1);
+      tasksInBox.splice(destinationIndex, 0, movedTask);
+
+      // Reassign order values
+      tasksInBox.forEach((task, index) => {
+        task.order = index;
+      });
+
+      // Merge updated tasks back into the global state
+      const updatedTasks = state.tasks.map((task) =>
+        task.boxId === boxId
+          ? tasksInBox.find((t) => t.id === task.id) || task
+          : task
+      );
+
       localStorage.setItem('tasks', JSON.stringify(updatedTasks));
       return { ...state, tasks: updatedTasks };
     }
