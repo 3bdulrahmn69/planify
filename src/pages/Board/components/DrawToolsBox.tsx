@@ -117,7 +117,7 @@ const DrawToolsBox = ({ tool, setTool }: DrawToolsBoxProps) => {
           tabIndex={0}
           className={`absolute top-4 left-2 bg-black rounded-full flex items-center justify-center w-9 h-9 text-white transition-transform ${
             tool === 'hand' ? 'bg-blue-500' : ''
-          }`}
+          } hover:scale-110 hover:border-blue-500 border-2`}
           onClick={handleClick('hand')}
         >
           <FaHandPaper size={18} />
@@ -128,7 +128,7 @@ const DrawToolsBox = ({ tool, setTool }: DrawToolsBoxProps) => {
           tabIndex={0}
           className={`absolute top-12 left-12 bg-black rounded-full flex items-center justify-center w-9 h-9 text-white transition-transform ${
             tool === 'pen' ? 'bg-blue-500' : ''
-          }`}
+          } hover:scale-110 hover:border-blue-500 border-2`}
           onClick={handleClick('pen')}
         >
           <FaPen size={18} />
@@ -139,7 +139,7 @@ const DrawToolsBox = ({ tool, setTool }: DrawToolsBoxProps) => {
           tabIndex={0}
           className={`absolute top-24 left-20 bg-black rounded-full flex items-center justify-center w-9 h-9 text-white transition-transform ${
             tool === 'eraser' ? 'bg-blue-500' : ''
-          }`}
+          } hover:scale-110 hover:border-blue-500 border-2`}
           onClick={handleClick('eraser')}
         >
           <FaEraser size={18} />
@@ -150,7 +150,7 @@ const DrawToolsBox = ({ tool, setTool }: DrawToolsBoxProps) => {
           tabIndex={0}
           className={`absolute top-36 left-28 bg-black rounded-full flex items-center justify-center w-9 h-9 text-white transition-transform ${
             tool === 'text' ? 'bg-blue-500' : ''
-          }`}
+          } hover:scale-110 hover:border-blue-500 border-2`}
           onClick={handleClick('text')}
         >
           <IoText size={18} />
@@ -161,7 +161,7 @@ const DrawToolsBox = ({ tool, setTool }: DrawToolsBoxProps) => {
           tabIndex={0}
           className={`absolute top-48 left-20 bg-black rounded-full flex items-center justify-center w-9 h-9 text-white transition-transform ${
             tool === 'line' ? 'bg-blue-500' : ''
-          }`}
+          } hover:scale-110 hover:border-blue-500 border-2`}
           onClick={handleClick('line')}
         >
           <FaDrawPolygon size={18} />
@@ -172,7 +172,7 @@ const DrawToolsBox = ({ tool, setTool }: DrawToolsBoxProps) => {
           tabIndex={0}
           className={`absolute top-56 left-12 bg-black rounded-full flex items-center justify-center w-9 h-9 text-white transition-transform ${
             tool === 'shapes' ? 'bg-blue-500' : ''
-          }`}
+          } hover:scale-110 hover:border-blue-500 border-2`}
           onClick={handleClick('shapes')}
         >
           <FaShapes size={18} />
@@ -183,7 +183,7 @@ const DrawToolsBox = ({ tool, setTool }: DrawToolsBoxProps) => {
           tabIndex={0}
           className={`absolute top-64 left-2 bg-black rounded-full flex items-center justify-center w-9 h-9 text-white transition-transform ${
             tool === 'image' ? 'bg-blue-500' : ''
-          }`}
+          } hover:scale-110 hover:border-blue-500 border-2`}
           onClick={handleClick('image')}
         >
           <FaImage size={18} />

@@ -12,6 +12,7 @@ import {
 } from 'react-icons/fa';
 import { KonvaEventObject } from 'konva/lib/Node';
 import Konva from 'konva';
+import DrawToolsSettings from './DrawToolsSettings';
 
 const DrawBoard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -215,13 +216,7 @@ const DrawBoard = () => {
       className="flex flex-col items-center justify-center h-full relative overflow-hidden"
       style={{ cursor: getCursor() }}
     >
-      <DrawToolsBox
-        tool={tool}
-        setTool={setTool}
-        setColor={setColor}
-        setLineSize={setLineSize}
-        lineSize={lineSize}
-      />
+      <DrawToolsBox tool={tool} setTool={setTool} />
 
       <Stage
         ref={stageRef}
@@ -250,6 +245,13 @@ const DrawBoard = () => {
           ))}
         </Layer>
       </Stage>
+
+      <DrawToolsSettings
+        setLineSize={setLineSize}
+        lineSize={lineSize}
+        setColor={setColor}
+        color={color}
+      />
 
       {/* Zoom Buttons */}
       <div className="fixed bottom-16 right-4 flex flex-col items-center gap-2 z-10">

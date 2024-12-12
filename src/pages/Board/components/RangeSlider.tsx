@@ -19,7 +19,7 @@ const RangeSlider = ({ value, setValue, label }: RangeSliderProps) => {
   const handleMouseUp = () => setTooltipVisible(false);
 
   return (
-    <div className="flex flex-col mt-4 w-full px-4">
+    <div className="flex flex-col mt-4 w-full">
       {label && <span className="text-gray-700 text-sm mb-2">{label}</span>}
       <div
         className="relative"
@@ -46,7 +46,7 @@ const RangeSlider = ({ value, setValue, label }: RangeSliderProps) => {
           onChange={(e) => setValue(Number(e.target.value))}
           onMouseDown={handleMouseDown}
           onMouseUp={handleMouseUp}
-          className="w-full h-1 appearance-none bg-gradient-to-r from-indigo-500 via-gray-300 to-gray-300 rounded-lg outline-none focus:ring-2 focus:bg-transparent"
+          className="w-full h-1 appearance-none bg-gradient-to-r from-gray-300 via-gray-500/50 to-indigo-500 rounded-lg outline-none focus:ring-2 focus:bg-transparent"
         />
       </div>
     </div>
