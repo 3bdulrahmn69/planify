@@ -7,6 +7,7 @@ import TasksBox from './components/TasksBox';
 import { Modal, ModalButton, ModalInput } from '../../components/Modal';
 import { useDashboardContext } from '../../Context/DashboardContext';
 import PlusButton from '../../components/PlusButton';
+import DrawBoard from './components/DrawBoard';
 
 const Board = () => {
   const location = useLocation();
@@ -61,7 +62,11 @@ const Board = () => {
           setIsRenameModalOpen(true);
         }}
       />
-      <main className="mt-28 w-full flex justify-center">
+      <main
+        className={`${
+          board?.type === 'task' ? 'mt-28' : ''
+        } w-full flex justify-center`}
+      >
         {board?.type === 'task' && (
           <TaskBoard>
             {state.taskBoxes
@@ -108,11 +113,7 @@ const Board = () => {
           </TaskBoard>
         )}
 
-        {board?.type === 'draw' && (
-          <TaskBoard className="w-full">
-            <h1 className="text-4xl text-center">Draw</h1>
-          </TaskBoard>
-        )}
+        {board?.type === 'draw' && <DrawBoard />}
       </main>
 
       <Modal
