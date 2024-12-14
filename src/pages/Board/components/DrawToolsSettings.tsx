@@ -3,8 +3,8 @@ import RangeSlider from './RangeSlider';
 import { IoIosArrowUp, IoIosArrowDown } from 'react-icons/io';
 
 interface DrawToolsSettingsProps {
-  setLineSize: (size: number) => void;
-  lineSize: number;
+  setAllSize: (size: number) => void;
+  allSize: number;
   setColor: (color: string) => void;
   color: string;
 }
@@ -19,8 +19,8 @@ const primaryColors = [
 ];
 
 const DrawToolsSettings = ({
-  setLineSize,
-  lineSize,
+  setAllSize,
+  allSize,
   setColor,
   color,
 }: DrawToolsSettingsProps) => {
@@ -62,7 +62,7 @@ const DrawToolsSettings = ({
       </button>
 
       {/* Range Slider for Line Size */}
-      <RangeSlider label="Line size" value={lineSize} setValue={setLineSize} />
+      <RangeSlider label="global size" value={allSize} setValue={setAllSize} />
 
       {/* Color Picker Section */}
       <section aria-labelledby="color-section">

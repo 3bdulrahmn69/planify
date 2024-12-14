@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Stage, Layer, Line } from 'react-konva';
+import { Stage, Layer, Line, Text as KonvaText } from 'react-konva';
 import DrawToolsBox from './DrawToolsBox';
-import { Modal, ModalButton } from '../../../components/Modal';
+import { Modal, ModalButton, ModalInput } from '../../../components/Modal';
 
 import {
   FaTrash,
@@ -15,14 +15,10 @@ import Konva from 'konva';
 import DrawToolsSettings from './DrawToolsSettings';
 
 const DrawBoard = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const isDrawing = useRef(false);
+  const stageRef = useRef<Konva.Stage>(null);
 
   const [tool, setTool] = useState('');
-  const [lineSize, setLineSize] = useState(15);
-  const [color, setColor] = useState('#000000');
-  const [lines, setLines] = useState<
-    { tool: string; color: string; strokeWidth: number; points: number[] }[]
-  >([]);
   const [redoStack, setRedoStack] = useState<
     { tool: string; color: string; strokeWidth: number; points: number[] }[]
   >([]);
@@ -31,17 +27,36 @@ const DrawBoard = () => {
     height: window.innerHeight,
   });
   const [scale, setScale] = useState(1); // Zoom level
+  const [isClearModalOpen, setIsClearModalOpen] = useState(false);
 
-  const isDrawing = useRef(false);
-  const stageRef = useRef<Konva.Stage>(null);
+  const [allSize, setAllSize] = useState(15);
+  const [color, setColor] = useState('#000000');
+  const [lines, setLines] = useState<
+    { tool: string; color: string; strokeWidth: number; points: number[] }[]
+  >([]);
 
-  const ZOOM_STEP = 0.1;
-  const MIN_ZOOM = 0.5;
-  const MAX_ZOOM = 3;
+  // New state for text elements
+  const [texts, setTexts] = useState<
+    {
+      id: string;
+      text: string;
+      x: number;
+      y: number;
+      fontSize: number;
+      color: string;
+    }[]
+  >([]);
+  const [isEditingText, setIsEditingText] = useState(false);
+  const [tempText, setTempText] = useState('');
+  const [selectedTextId, setSelectedTextId] = useState<string | null>(null);
 
   /* Modal Functions */
-  const handleCLoseModal = () => {
-    setIsModalOpen(false);
+  const handleCLoseClearModal = () => {
+    setIsClearModalOpen(false);
+  };
+
+  const handleCLoseEditTextModal = () => {
+    setIsEditingText(false);
   };
 
   // Undo last action
@@ -68,7 +83,8 @@ const DrawBoard = () => {
   const handleClear = () => {
     setLines([]);
     setRedoStack([]);
-    setIsModalOpen(false);
+    setTexts([]);
+    setIsClearModalOpen(false);
   };
 
   // Dynamic Cursor
@@ -93,6 +109,10 @@ const DrawBoard = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  const ZOOM_STEP = 0.1;
+  const MIN_ZOOM = 0.5;
+  const MAX_ZOOM = 3;
 
   // Zoom handler
   const handleWheel = useCallback((e: KonvaEventObject<WheelEvent>) => {
@@ -167,12 +187,41 @@ const DrawBoard = () => {
         {
           tool,
           color,
-          strokeWidth: lineSize,
+          strokeWidth: allSize,
           points: [translatedPoint.x, translatedPoint.y],
         },
       ]);
     }
-  }, [tool, color, lineSize]);
+
+    if (tool === 'text') {
+      const stage = stageRef.current;
+      const point = stage?.getPointerPosition();
+      if (!point) return;
+      if (!stage) return;
+
+      const scale = stage.scaleX();
+      const offsetX = stage.x();
+      const offsetY = stage.y();
+
+      const translatedPoint = {
+        x: (point.x - (offsetX ?? 0)) / (scale ?? 1),
+        y: (point.y - (offsetY ?? 0)) / (scale ?? 1),
+      };
+
+      // Add new text element
+      const newText = {
+        id: `${Date.now()}`, // Unique ID for text
+        text: 'Double click to edit',
+        x: translatedPoint.x,
+        y: translatedPoint.y,
+        fontSize: allSize,
+        color: color,
+      };
+
+      setTexts((prevTexts) => [...prevTexts, newText]);
+      setTool(''); // Switch tool after adding text
+    }
+  }, [tool, color, allSize]);
 
   // Continue drawing
   const handleMouseMove = useCallback(() => {
@@ -211,6 +260,47 @@ const DrawBoard = () => {
     setScale(Number(e.target.value));
   };
 
+  const handleDblTextClick = (id: string, currentText: string) => {
+    setSelectedTextId(id);
+    setTempText(currentText);
+    setIsEditingText(true);
+  };
+
+  const handleTextEdit = () => {
+    if (selectedTextId) {
+      setTexts((prevTexts) =>
+        prevTexts.map((text) =>
+          text.id === selectedTextId ? { ...text, text: tempText } : text
+        )
+      );
+      setIsEditingText(false);
+    }
+  };
+
+  useEffect(() => {
+    const handleKeydown = (e: KeyboardEvent) => {
+      switch (true) {
+        case e.ctrlKey && e.key.toLowerCase() === 'z':
+          handleUndo(); // Call the undo function
+          break;
+        case e.ctrlKey && e.key.toLowerCase() === 'x':
+          handleRedo(); // Call the redo function
+          break;
+        case e.key.toLowerCase() === 'c':
+          setIsClearModalOpen(true); // Open the clear modal
+          break;
+        default:
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeydown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeydown);
+    };
+  }, []);
+
   return (
     <div
       className="flex flex-col items-center justify-center h-full relative overflow-hidden"
@@ -243,12 +333,34 @@ const DrawBoard = () => {
               }
             />
           ))}
+
+          {texts.map((text) => (
+            <KonvaText
+              key={text.id}
+              text={text.text}
+              fontSize={text.fontSize}
+              x={text.x}
+              y={text.y}
+              draggable
+              fill={text.color}
+              onDblClick={() => handleDblTextClick(text.id, text.text)}
+              onDragEnd={(e) => {
+                const newX = e.target.x();
+                const newY = e.target.y();
+                setTexts((prevTexts) =>
+                  prevTexts.map((t) =>
+                    t.id === text.id ? { ...t, x: newX, y: newY } : t
+                  )
+                );
+              }}
+            />
+          ))}
         </Layer>
       </Stage>
 
       <DrawToolsSettings
-        setLineSize={setLineSize}
-        lineSize={lineSize}
+        setAllSize={setAllSize}
+        allSize={allSize}
         setColor={setColor}
         color={color}
       />
@@ -337,10 +449,12 @@ const DrawBoard = () => {
         {/* Clear Button */}
         <button
           className={`bg-red-500 text-white p-2 rounded-full shadow-md hover:bg-red-600 transition-all ${
-            lines.length === 0 ? 'bg-gray-400 hover:bg-gray-400' : ''
+            lines.length === 0 && texts.length === 0
+              ? 'bg-gray-400 hover:bg-gray-400'
+              : ''
           }`}
-          onClick={() => setIsModalOpen(true)}
-          disabled={lines.length === 0}
+          onClick={() => setIsClearModalOpen(true)}
+          disabled={lines.length === 0 && texts.length === 0}
           aria-label="Clear Canvas"
           title="Clear Canvas"
         >
@@ -351,8 +465,8 @@ const DrawBoard = () => {
       {/* Modal for Clear Confirmation */}
       <Modal
         title="Clear Canvas"
-        isOpen={isModalOpen}
-        onClose={handleCLoseModal}
+        isOpen={isClearModalOpen}
+        onClose={handleCLoseClearModal}
         titleClassName="text-red-500"
       >
         <p
@@ -362,13 +476,32 @@ const DrawBoard = () => {
           Are you sure you want to clear the canvas?
         </p>
         <div className="flex gap-2">
-          <ModalButton onClick={handleCLoseModal}>Cancel</ModalButton>
+          <ModalButton onClick={handleCLoseClearModal}>Cancel</ModalButton>
           <ModalButton
             className="bg-red-500 hover:bg-red-600"
             onClick={handleClear}
           >
             Clear
           </ModalButton>
+        </div>
+      </Modal>
+
+      {/* Modal for Text Editing */}
+      <Modal title="" isOpen={isEditingText} onClose={handleCLoseEditTextModal}>
+        <ModalInput
+          placeholder="Enter text here"
+          value={tempText}
+          onChange={(e) => setTempText(e.target.value)}
+          onEnter={handleTextEdit}
+        />
+        <div className="flex gap-2">
+          <ModalButton
+            className="bg-red-500 hover:bg-red-600"
+            onClick={handleCLoseEditTextModal}
+          >
+            Cancel
+          </ModalButton>
+          <ModalButton onClick={handleTextEdit}>Update</ModalButton>
         </div>
       </Modal>
     </div>
