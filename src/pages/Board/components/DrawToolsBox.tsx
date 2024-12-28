@@ -36,7 +36,7 @@ const DrawToolsBox = ({
   const handleToolChange = useCallback(
     (newTool: string) => {
       if (newTool === tool) {
-        setTool('');
+        setTool('default');
         return;
       }
       setTool(newTool);
@@ -64,7 +64,7 @@ const DrawToolsBox = ({
 
       switch (event.key.toLowerCase()) {
         case 'r':
-          handleToolChange('');
+          handleToolChange('default');
           break;
         case 'p':
           handleToolChange('pen');

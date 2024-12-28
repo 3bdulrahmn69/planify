@@ -16,13 +16,15 @@ import Konva from 'konva';
 import DrawToolsSettings from './DrawToolsSettings';
 import Tips from './Tips';
 
+const DOUBLE_CLICK_DELAY = 300;
+
 const DrawBoard = () => {
   const isDrawing = useRef(false);
   const stageRef = useRef<Konva.Stage>(null);
   const [searchParams] = useSearchParams();
   const boardId = searchParams.get('id') || '';
 
-  const [tool, setTool] = useState('');
+  const [tool, setTool] = useState('default');
   const [redoStack, setRedoStack] = useState<
     { tool: string; color: string; strokeWidth: number; points: number[] }[]
   >([]);
@@ -215,6 +217,7 @@ const DrawBoard = () => {
 
   // Start drawing
   const handleMouseDown = useCallback(() => {
+    handleRest();
     if (tool === 'pen' || tool === 'eraser') {
       isDrawing.current = true;
       const stage = stageRef.current;
@@ -289,7 +292,7 @@ const DrawBoard = () => {
           }[]
         ) => [...prevTexts, newText]
       );
-      setTool(''); // Switch tool after adding text
+      setTool('default'); // Switch tool after adding text
     }
   }, [tool, color, allSize]);
 
@@ -343,15 +346,36 @@ const DrawBoard = () => {
     setScale(Number(e.target.value));
   };
 
-  const handleDblTextClick = (id: string, currentText: string) => {
-    setSelectedTextId(id);
-    setTempText(currentText);
-    setIsEditingText(true);
-  };
+  const clickTimeout = useRef<number | null>(null);
 
-  const handleTextClick = (id: string) => () => {
-    setSelectedTextId(id);
-  };
+  const handleTextClick = useCallback(
+    (id: string) => {
+      if (tool !== 'default') return;
+      if (clickTimeout.current) {
+        clearTimeout(clickTimeout.current);
+      }
+
+      clickTimeout.current = window.setTimeout(() => {
+        setSelectedTextId(id);
+        clickTimeout.current = null;
+      }, DOUBLE_CLICK_DELAY);
+    },
+    [tool]
+  );
+
+  const handleDblTextClick = useCallback(
+    (id: string, currentText: string) => {
+      if (tool !== 'default') return;
+      if (clickTimeout.current) {
+        clearTimeout(clickTimeout.current);
+      }
+
+      setSelectedTextId(id);
+      setTempText(currentText);
+      setIsEditingText(true);
+    },
+    [tool]
+  );
 
   const handleTextEdit = () => {
     if (selectedTextId) {
@@ -375,6 +399,24 @@ const DrawBoard = () => {
   };
 
   useEffect(() => {
+    const handleTextDelete = () => {
+      if (selectedTextId) {
+        setTexts(
+          (
+            prevTexts: {
+              id: string;
+              text: string;
+              x: number;
+              y: number;
+              fontSize: number;
+              color: string;
+            }[]
+          ) => prevTexts.filter((text) => text.id !== selectedTextId)
+        );
+        setSelectedTextId(null);
+      }
+    };
+
     const handleKeydown = (e: KeyboardEvent) => {
       switch (!isEditingText) {
         case e.ctrlKey && e.key.toLowerCase() === 'z':
@@ -392,6 +434,10 @@ const DrawBoard = () => {
         case e.key.toLowerCase() === '?':
           setShowTips(true); // Open the tips modal
           break;
+        case e.key.toLowerCase() === 'delete':
+          console.log('Delete key pressed');
+          handleTextDelete(); // Delete the selected text
+          break;
         default:
           break;
       }
@@ -402,7 +448,7 @@ const DrawBoard = () => {
     return () => {
       window.removeEventListener('keydown', handleKeydown);
     };
-  }, [isEditingText]);
+  }, [isEditingText, selectedTextId]);
 
   return (
     <div
@@ -484,7 +530,7 @@ const DrawBoard = () => {
                   y={text.y}
                   draggable
                   fill={text.color}
-                  onClick={handleTextClick(text.id)}
+                  onClick={() => handleTextClick(text.id)}
                   onDblClick={() => handleDblTextClick(text.id, text.text)}
                   onDragEnd={(e) => {
                     const newX = e.target.x();
