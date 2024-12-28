@@ -309,14 +309,23 @@ const DrawBoard = () => {
       y: (point.y - (offsetY ?? 0)) / (scale ?? 1),
     };
 
-    setLines((prevLines: { tool: string; color: string; strokeWidth: number; points: number[] }[]) => {
-      const lastLine = prevLines[prevLines.length - 1];
-      const updatedLine = {
-        ...lastLine,
-        points: [...lastLine.points, translatedPoint.x, translatedPoint.y],
-      };
-      return [...prevLines.slice(0, -1), updatedLine];
-    });
+    setLines(
+      (
+        prevLines: {
+          tool: string;
+          color: string;
+          strokeWidth: number;
+          points: number[];
+        }[]
+      ) => {
+        const lastLine = prevLines[prevLines.length - 1];
+        const updatedLine = {
+          ...lastLine,
+          points: [...lastLine.points, translatedPoint.x, translatedPoint.y],
+        };
+        return [...prevLines.slice(0, -1), updatedLine];
+      }
+    );
   }, []);
 
   // End drawing
