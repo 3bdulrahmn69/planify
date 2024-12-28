@@ -14,6 +14,7 @@ import {
 import { KonvaEventObject } from 'konva/lib/Node';
 import Konva from 'konva';
 import DrawToolsSettings from './DrawToolsSettings';
+import Tips from './Tips';
 
 const DrawBoard = () => {
   const isDrawing = useRef(false);
@@ -31,6 +32,7 @@ const DrawBoard = () => {
   });
   const [scale, setScale] = useState(1); // Zoom level
   const [isClearModalOpen, setIsClearModalOpen] = useState(false);
+  const [showTips, setShowTips] = useState(false);
 
   const [allSize, setAllSize] = useState(15);
   const [color, setColor] = useState('#000000');
@@ -384,6 +386,12 @@ const DrawBoard = () => {
         case e.key.toLowerCase() === 'c':
           setIsClearModalOpen(true); // Open the clear modal
           break;
+        case e.key.toLowerCase() === 'escape':
+          setShowTips(false); // Close the tips modal
+          break;
+        case e.key.toLowerCase() === '?':
+          setShowTips(true); // Open the tips modal
+          break;
         default:
           break;
       }
@@ -608,6 +616,19 @@ const DrawBoard = () => {
           <FaTrash size={18} />
         </button>
       </div>
+
+      <div>
+        <button
+          className="fixed bottom-4 left-4 bg-blue-500 text-white w-12 h-8 rounded-sm  shadow-md hover:bg-blue-600 transition-all"
+          onClick={() => setShowTips(true)}
+          aria-label="Show Keyboard Shortcuts"
+          title="Show Keyboard Shortcuts"
+        >
+          ?
+        </button>
+      </div>
+
+      <Tips showTips={showTips} setShowTips={setShowTips} />
 
       {/* Modal for Clear Confirmation */}
       <Modal
