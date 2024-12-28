@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Stage, Layer, Line, Text as KonvaText, Rect } from 'react-konva';
 import DrawToolsBox from './DrawToolsBox';
 import { Modal, ModalButton, ModalInput } from '../../../components/Modal';
@@ -17,6 +18,8 @@ import DrawToolsSettings from './DrawToolsSettings';
 const DrawBoard = () => {
   const isDrawing = useRef(false);
   const stageRef = useRef<Konva.Stage>(null);
+  const [searchParams] = useSearchParams();
+  const boardId = searchParams.get('id') || '';
 
   const [tool, setTool] = useState('');
   const [redoStack, setRedoStack] = useState<
@@ -31,24 +34,51 @@ const DrawBoard = () => {
 
   const [allSize, setAllSize] = useState(15);
   const [color, setColor] = useState('#000000');
-  const [lines, setLines] = useState<
-    { tool: string; color: string; strokeWidth: number; points: number[] }[]
-  >([]);
+  const [lines, setLines] = useState(() => {
+    if (!boardId) return []; // If no board ID, return an empty array
+    const savedData = localStorage.getItem(boardId);
+    return savedData ? JSON.parse(savedData).lines || [] : [];
+  });
 
   // New state for text elements
-  const [texts, setTexts] = useState<
-    {
-      id: string;
-      text: string;
-      x: number;
-      y: number;
-      fontSize: number;
-      color: string;
-    }[]
-  >([]);
+  const [texts, setTexts] = useState(() => {
+    if (!boardId) return []; // If no board ID, return an empty array
+    const savedData = localStorage.getItem(boardId);
+    return savedData ? JSON.parse(savedData).texts || [] : [];
+  });
   const [isEditingText, setIsEditingText] = useState(false);
   const [tempText, setTempText] = useState('');
   const [selectedTextId, setSelectedTextId] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Load data on initial render
+    const loadData = () => {
+      const savedData = localStorage.getItem(boardId);
+      if (savedData) {
+        const parsedData = JSON.parse(savedData);
+        setLines(parsedData.lines || []);
+        setTexts(parsedData.texts || []);
+      }
+    };
+
+    // Prevent overwriting on initial render
+    if (boardId) {
+      loadData();
+    }
+  }, [boardId]); // Run only when the boardId changes
+
+  useEffect(() => {
+    const saveData = () => {
+      if (!boardId) return; // Avoid saving if boardId is not available
+      const boardData = {
+        lines,
+        texts,
+      };
+      localStorage.setItem(boardId, JSON.stringify(boardData));
+    };
+
+    saveData();
+  }, [lines, texts, boardId]);
 
   /* Modal Functions */
   const handleCLoseClearModal = () => {
@@ -61,12 +91,21 @@ const DrawBoard = () => {
 
   // Undo last action
   const handleUndo = () => {
-    setLines((prevLines) => {
-      if (prevLines.length === 0) return prevLines;
-      const lastLine = prevLines[prevLines.length - 1];
-      setRedoStack((prevRedoStack) => [lastLine, ...prevRedoStack]);
-      return prevLines.slice(0, -1);
-    });
+    setLines(
+      (
+        prevLines: {
+          tool: string;
+          color: string;
+          strokeWidth: number;
+          points: number[];
+        }[]
+      ) => {
+        if (prevLines.length === 0) return prevLines;
+        const lastLine = prevLines[prevLines.length - 1];
+        setRedoStack((prevRedoStack) => [lastLine, ...prevRedoStack]);
+        return prevLines.slice(0, -1);
+      }
+    );
   };
 
   // Redo last undone action
@@ -74,7 +113,16 @@ const DrawBoard = () => {
     setRedoStack((prevRedoStack) => {
       if (prevRedoStack.length === 0) return prevRedoStack;
       const lastUndone = prevRedoStack[0];
-      setLines((prevLines) => [...prevLines, lastUndone]);
+      setLines(
+        (
+          prevLines: {
+            tool: string;
+            color: string;
+            strokeWidth: number;
+            points: number[];
+          }[]
+        ) => [...prevLines, lastUndone]
+      );
       return prevRedoStack.slice(1);
     });
   };
@@ -182,15 +230,24 @@ const DrawBoard = () => {
       };
 
       setRedoStack([]); // Clear redo stack on new action
-      setLines((prevLines) => [
-        ...prevLines,
-        {
-          tool,
-          color,
-          strokeWidth: allSize,
-          points: [translatedPoint.x, translatedPoint.y],
-        },
-      ]);
+      setLines(
+        (
+          prevLines: {
+            tool: string;
+            color: string;
+            strokeWidth: number;
+            points: number[];
+          }[]
+        ) => [
+          ...prevLines,
+          {
+            tool,
+            color,
+            strokeWidth: allSize,
+            points: [translatedPoint.x, translatedPoint.y],
+          },
+        ]
+      );
     }
 
     if (tool === 'text') {
@@ -218,7 +275,18 @@ const DrawBoard = () => {
         color: color,
       };
 
-      setTexts((prevTexts) => [...prevTexts, newText]);
+      setTexts(
+        (
+          prevTexts: {
+            id: string;
+            text: string;
+            x: number;
+            y: number;
+            fontSize: number;
+            color: string;
+          }[]
+        ) => [...prevTexts, newText]
+      );
       setTool(''); // Switch tool after adding text
     }
   }, [tool, color, allSize]);
@@ -241,7 +309,7 @@ const DrawBoard = () => {
       y: (point.y - (offsetY ?? 0)) / (scale ?? 1),
     };
 
-    setLines((prevLines) => {
+    setLines((prevLines: { tool: string; color: string; strokeWidth: number; points: number[] }[]) => {
       const lastLine = prevLines[prevLines.length - 1];
       const updatedLine = {
         ...lastLine,
@@ -276,10 +344,20 @@ const DrawBoard = () => {
 
   const handleTextEdit = () => {
     if (selectedTextId) {
-      setTexts((prevTexts) =>
-        prevTexts.map((text) =>
-          text.id === selectedTextId ? { ...text, text: tempText } : text
-        )
+      setTexts(
+        (
+          prevTexts: {
+            id: string;
+            text: string;
+            x: number;
+            y: number;
+            fontSize: number;
+            color: string;
+          }[]
+        ) =>
+          prevTexts.map((text) =>
+            text.id === selectedTextId ? { ...text, text: tempText } : text
+          )
       );
       setIsEditingText(false);
     }
@@ -332,59 +410,88 @@ const DrawBoard = () => {
         onClick={handleRest}
       >
         <Layer>
-          {lines.map((line, i) => (
-            <Line
-              key={i}
-              points={line.points}
-              stroke={line.color}
-              strokeWidth={line.strokeWidth}
-              tension={0.5}
-              lineCap="round"
-              lineJoin="round"
-              globalCompositeOperation={
-                line.tool === 'eraser' ? 'destination-out' : 'source-over'
-              }
-            />
-          ))}
-
-          {texts.map((text) => (
-            <React.Fragment key={text.id}>
-              {/* Conditional dashed border */}
-              {selectedTextId === text.id && (
-                <Rect
-                  x={text.x - 5} // Slight padding around the text
-                  y={text.y - 5}
-                  width={text.text.length * text.fontSize * 0.6} // Estimate text width
-                  height={text.fontSize + 8} // Adjust to fit the text height
-                  stroke="blue"
-                  strokeWidth={1}
-                  dash={[4, 4]} // Dashed border
-                  listening={false} // Make it non-interactive
-                />
-              )}
-              {/* Actual text */}
-              <KonvaText
-                key={text.id}
-                text={text.text}
-                fontSize={text.fontSize}
-                x={text.x}
-                y={text.y}
-                draggable
-                fill={text.color}
-                onClick={handleTextClick(text.id)}
-                onDblClick={() => handleDblTextClick(text.id, text.text)}
-                onDragEnd={(e) => {
-                  const newX = e.target.x();
-                  const newY = e.target.y();
-                  setTexts((prevTexts) =>
-                    prevTexts.map((t) =>
-                      t.id === text.id ? { ...t, x: newX, y: newY } : t
-                    )
-                  );
-                }}
+          {lines.map(
+            (
+              line: {
+                tool: string;
+                color: string;
+                strokeWidth: number;
+                points: number[];
+              },
+              i: number
+            ) => (
+              <Line
+                key={i}
+                points={line.points}
+                stroke={line.color}
+                strokeWidth={line.strokeWidth}
+                tension={0.5}
+                lineCap="round"
+                lineJoin="round"
+                globalCompositeOperation={
+                  line.tool === 'eraser' ? 'destination-out' : 'source-over'
+                }
               />
-            </React.Fragment>
-          ))}
+            )
+          )}
+
+          {texts.map(
+            (text: {
+              id: string;
+              text: string;
+              x: number;
+              y: number;
+              fontSize: number;
+              color: string;
+            }) => (
+              <React.Fragment key={text.id}>
+                {/* Conditional dashed border */}
+                {selectedTextId === text.id && (
+                  <Rect
+                    x={text.x - 5} // Slight padding around the text
+                    y={text.y - 5}
+                    width={text.text.length * text.fontSize * 0.6} // Estimate text width
+                    height={text.fontSize + 8} // Adjust to fit the text height
+                    stroke="blue"
+                    strokeWidth={1}
+                    dash={[4, 4]} // Dashed border
+                    listening={false} // Make it non-interactive
+                  />
+                )}
+                {/* Actual text */}
+                <KonvaText
+                  key={text.id}
+                  text={text.text}
+                  fontSize={text.fontSize}
+                  x={text.x}
+                  y={text.y}
+                  draggable
+                  fill={text.color}
+                  onClick={handleTextClick(text.id)}
+                  onDblClick={() => handleDblTextClick(text.id, text.text)}
+                  onDragEnd={(e) => {
+                    const newX = e.target.x();
+                    const newY = e.target.y();
+                    setTexts(
+                      (
+                        prevTexts: {
+                          id: string;
+                          text: string;
+                          x: number;
+                          y: number;
+                          fontSize: number;
+                          color: string;
+                        }[]
+                      ) =>
+                        prevTexts.map((t) =>
+                          t.id === text.id ? { ...t, x: newX, y: newY } : t
+                        )
+                    );
+                  }}
+                />
+              </React.Fragment>
+            )
+          )}
         </Layer>
       </Stage>
 
