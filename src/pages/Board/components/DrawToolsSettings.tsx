@@ -7,6 +7,7 @@ interface DrawToolsSettingsProps {
   allSize: number;
   setColor: (color: string) => void;
   color: string;
+  isKeyboardShortcutsDisable?: boolean;
 }
 
 const primaryColors = [
@@ -23,6 +24,7 @@ const DrawToolsSettings = ({
   allSize,
   setColor,
   color,
+  isKeyboardShortcutsDisable,
 }: DrawToolsSettingsProps) => {
   const [isExpanded, setExpanded] = useState(false);
 
@@ -31,6 +33,7 @@ const DrawToolsSettings = ({
 
   useEffect(() => {
     const handleKeydown = (e: KeyboardEvent) => {
+      if (isKeyboardShortcutsDisable) return;
       if (e.key.toLowerCase() === 'f') {
         toggleExpanded();
       }
@@ -41,7 +44,7 @@ const DrawToolsSettings = ({
     return () => {
       window.removeEventListener('keydown', handleKeydown);
     };
-  }, [toggleExpanded]);
+  }, [toggleExpanded, isKeyboardShortcutsDisable]);
 
   return (
     <div
@@ -62,7 +65,12 @@ const DrawToolsSettings = ({
       </button>
 
       {/* Range Slider for Line Size */}
-      <RangeSlider label="global size" value={allSize} setValue={setAllSize} />
+      <RangeSlider
+        label="global size"
+        value={allSize}
+        setValue={setAllSize}
+        isKeyboardShortcutsDisable={isKeyboardShortcutsDisable}
+      />
 
       {/* Color Picker Section */}
       <section aria-labelledby="color-section">

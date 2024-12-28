@@ -14,11 +14,16 @@ import { IoText } from 'react-icons/io5';
 interface DrawToolsBoxProps {
   tool: string | null;
   setTool: (tool: string) => void;
+  isKeyboardShortcutsDisable?: boolean;
 }
 
 const DEBOUNCE_DELAY = 150; // milliseconds
 
-const DrawToolsBox = ({ tool, setTool }: DrawToolsBoxProps) => {
+const DrawToolsBox = ({
+  tool,
+  setTool,
+  isKeyboardShortcutsDisable,
+}: DrawToolsBoxProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [lastKeyTime, setLastKeyTime] = useState(0);
 
@@ -42,11 +47,20 @@ const DrawToolsBox = ({ tool, setTool }: DrawToolsBoxProps) => {
   // Add keyboard shortcuts with debounce
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (isKeyboardShortcutsDisable) return;
+
       const currentTime = Date.now();
       if (currentTime - lastKeyTime < DEBOUNCE_DELAY) {
-        return; // Ignore rapid keypresses
+        return;
       }
       setLastKeyTime(currentTime);
+
+      // Check for Space key (both " " and "Space")
+      if (event.key === ' ' || event.key === 'Space') {
+        event.preventDefault(); // Prevent default scrolling behavior
+        setTool('hand');
+        return;
+      }
 
       switch (event.key.toLowerCase()) {
         case 'r':
@@ -81,13 +95,28 @@ const DrawToolsBox = ({ tool, setTool }: DrawToolsBoxProps) => {
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
+    const handleKeyUp = (event: KeyboardEvent) => {
+      // Check for Space key (both " " and "Space")
+      if (event.key === ' ' || event.key === 'Space') {
+        setTool('');
+      }
+    };
 
-    // Cleanup the event listener on component unmount
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [tool, handleToolChange, lastKeyTime, toggleToolBox]);
+  }, [
+    tool,
+    handleToolChange,
+    lastKeyTime,
+    toggleToolBox,
+    isKeyboardShortcutsDisable,
+    setTool,
+  ]);
 
   // Click handler to avoid inline functions in JSX
   const handleClick = (toolName: string) => () => {

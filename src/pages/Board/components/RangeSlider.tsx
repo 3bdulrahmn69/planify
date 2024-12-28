@@ -1,12 +1,18 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface RangeSliderProps {
   value: number;
   setValue: (value: number) => void;
   label?: string;
+  isKeyboardShortcutsDisable?: boolean;
 }
 
-const RangeSlider = ({ value, setValue, label }: RangeSliderProps) => {
+const RangeSlider = ({
+  value,
+  setValue,
+  label,
+  isKeyboardShortcutsDisable,
+}: RangeSliderProps) => {
   const [isTooltipVisible, setTooltipVisible] = useState(false);
 
   const calculateLeftPosition = () => {
@@ -17,6 +23,23 @@ const RangeSlider = ({ value, setValue, label }: RangeSliderProps) => {
   const handleMouseLeave = () => setTooltipVisible(false);
   const handleMouseDown = () => setTooltipVisible(true);
   const handleMouseUp = () => setTooltipVisible(false);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (isKeyboardShortcutsDisable) return;
+      if (event.key === '<') {
+        setValue(Math.max(1, value - 1)); // Decrease value by 1, minimum 1
+      } else if (event.key === '>') {
+        setValue(Math.min(53, value + 1)); // Increase value by 1, maximum 53
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [value, setValue, isKeyboardShortcutsDisable]);
 
   return (
     <div className="flex flex-col mt-4 w-full">

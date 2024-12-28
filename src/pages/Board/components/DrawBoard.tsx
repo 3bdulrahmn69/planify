@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
-import { Stage, Layer, Line, Text as KonvaText } from 'react-konva';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { Stage, Layer, Line, Text as KonvaText, Rect } from 'react-konva';
 import DrawToolsBox from './DrawToolsBox';
 import { Modal, ModalButton, ModalInput } from '../../../components/Modal';
 
@@ -256,6 +256,10 @@ const DrawBoard = () => {
     isDrawing.current = false;
   }, []);
 
+  const handleRest = () => {
+    setSelectedTextId(null);
+  };
+
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setScale(Number(e.target.value));
   };
@@ -264,6 +268,10 @@ const DrawBoard = () => {
     setSelectedTextId(id);
     setTempText(currentText);
     setIsEditingText(true);
+  };
+
+  const handleTextClick = (id: string) => () => {
+    setSelectedTextId(id);
   };
 
   const handleTextEdit = () => {
@@ -279,7 +287,7 @@ const DrawBoard = () => {
 
   useEffect(() => {
     const handleKeydown = (e: KeyboardEvent) => {
-      switch (true) {
+      switch (!isEditingText) {
         case e.ctrlKey && e.key.toLowerCase() === 'z':
           handleUndo(); // Call the undo function
           break;
@@ -299,14 +307,18 @@ const DrawBoard = () => {
     return () => {
       window.removeEventListener('keydown', handleKeydown);
     };
-  }, []);
+  }, [isEditingText]);
 
   return (
     <div
       className="flex flex-col items-center justify-center h-full relative overflow-hidden"
       style={{ cursor: getCursor() }}
     >
-      <DrawToolsBox tool={tool} setTool={setTool} />
+      <DrawToolsBox
+        tool={tool}
+        setTool={setTool}
+        isKeyboardShortcutsDisable={isEditingText}
+      />
 
       <Stage
         ref={stageRef}
@@ -317,6 +329,7 @@ const DrawBoard = () => {
         onMouseDown={handleMouseDown}
         onMousemove={handleMouseMove}
         onMouseup={handleMouseUp}
+        onClick={handleRest}
       >
         <Layer>
           {lines.map((line, i) => (
@@ -335,25 +348,42 @@ const DrawBoard = () => {
           ))}
 
           {texts.map((text) => (
-            <KonvaText
-              key={text.id}
-              text={text.text}
-              fontSize={text.fontSize}
-              x={text.x}
-              y={text.y}
-              draggable
-              fill={text.color}
-              onDblClick={() => handleDblTextClick(text.id, text.text)}
-              onDragEnd={(e) => {
-                const newX = e.target.x();
-                const newY = e.target.y();
-                setTexts((prevTexts) =>
-                  prevTexts.map((t) =>
-                    t.id === text.id ? { ...t, x: newX, y: newY } : t
-                  )
-                );
-              }}
-            />
+            <React.Fragment key={text.id}>
+              {/* Conditional dashed border */}
+              {selectedTextId === text.id && (
+                <Rect
+                  x={text.x - 5} // Slight padding around the text
+                  y={text.y - 5}
+                  width={text.text.length * text.fontSize * 0.6} // Estimate text width
+                  height={text.fontSize + 8} // Adjust to fit the text height
+                  stroke="blue"
+                  strokeWidth={1}
+                  dash={[4, 4]} // Dashed border
+                  listening={false} // Make it non-interactive
+                />
+              )}
+              {/* Actual text */}
+              <KonvaText
+                key={text.id}
+                text={text.text}
+                fontSize={text.fontSize}
+                x={text.x}
+                y={text.y}
+                draggable
+                fill={text.color}
+                onClick={handleTextClick(text.id)}
+                onDblClick={() => handleDblTextClick(text.id, text.text)}
+                onDragEnd={(e) => {
+                  const newX = e.target.x();
+                  const newY = e.target.y();
+                  setTexts((prevTexts) =>
+                    prevTexts.map((t) =>
+                      t.id === text.id ? { ...t, x: newX, y: newY } : t
+                    )
+                  );
+                }}
+              />
+            </React.Fragment>
           ))}
         </Layer>
       </Stage>
@@ -363,6 +393,7 @@ const DrawBoard = () => {
         allSize={allSize}
         setColor={setColor}
         color={color}
+        isKeyboardShortcutsDisable={isEditingText}
       />
 
       {/* Zoom Buttons */}
