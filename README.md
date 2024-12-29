@@ -9,8 +9,8 @@ Planify provides an intuitive and user-friendly interface for managing tasks, al
 ### Key Features
 
 - **Task Boards**: Visual boards that help you organize tasks by category, priority, or status. You can create multiple boards, each tailored to a specific project or task group.
-  
 - **Two Board Types**:
+
   - **Task Type**: Create boards where you can add multiple task boxes. Each box can contain tasks that can be easily moved or reordered using drag-and-drop functionality.
   - **Draw Type** (Upcoming): A dynamic board that lets you draw and insert text and shapes to represent ideas, processes, or project planning.
 
@@ -30,12 +30,11 @@ Planify provides an intuitive and user-friendly interface for managing tasks, al
 - **React DnD**: A library that facilitates drag-and-drop functionality, allowing users to move tasks across boxes and reorder them effortlessly.
 - **Tailwind CSS**: A utility-first CSS framework that powers the UI components with responsive and customizable styles.
 - **UUID**: Used to generate unique IDs for boards, tasks, and boxes for reliable identification and management.
-- **Konva.js** (Upcoming): A powerful canvas library for drawing interactive shapes and text, providing advanced drawing capabilities for the Draw Type board.
+- **Konva.js**: A powerful canvas library for drawing interactive shapes and text, providing advanced drawing capabilities for the Draw Type board.
 
 ## Architecture & Performance
 
 - **useContext**: Used for managing user authentication and global state (such as boards, tasks, and settings). This allows for centralized state management and easy access to data across components.
-  
 - **useMemo**: Helps optimize performance by memoizing expensive operations like filtering and sorting tasks, ensuring that unnecessary re-renders are avoided.
 
 - **Lazy Loading**: Implemented for route-based code splitting, improving performance by loading only the necessary components when needed. This enhances the overall speed and responsiveness of the application.

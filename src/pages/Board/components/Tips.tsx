@@ -8,25 +8,28 @@ const Tips = ({
   setShowTips: (show: boolean) => void;
 }) => {
   const shortcuts = [
-    { shortcut: 'Delete', description: 'Delete selected task or object' },
+    { shortcut: 'Delete', description: 'Delete selected text' },
     { shortcut: 'P', description: 'Select Pen tool' },
     { shortcut: 'E', description: 'Select Eraser tool' },
     { shortcut: 'A', description: 'Select Text tool' },
     { shortcut: 'H', description: 'Select Hand tool' },
+    { shortcut: 'Space', description: 'press it to use Hand tool' },
     { shortcut: 'F', description: 'Toggle Setting' },
-    { shortcut: 'Space', description: 'Keep pressing it to use Hand tool' },
-    { shortcut: '?', description: 'Toggle the help tips' },
+    { shortcut: '<', description: 'Increase the brush size' },
+    { shortcut: '>', description: 'Decrease the brush size' },
+    { shortcut: 'F11', description: 'Toggle full screen mode' },
     { shortcut: 'Esc', description: 'Close the current dialog' },
     { shortcut: 'Ctrl + Z', description: 'Undo the last action' },
-    { shortcut: 'Ctrl + X', description: 'Redo the last undone action' },
-    { shortcut: 'C', description: 'Clear the board' },
+    { shortcut: 'Ctrl + X', description: 'Redo the last action' },
+    { shortcut: 'C', description: 'Clear the canova' },
+    { shortcut: '?', description: 'Toggle the help tips' },
   ];
 
   return (
     <div
       className={`${
         showTips ? 'block' : 'hidden'
-      } fixed inset-0 z-50 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-center`}
+      } fixed inset-0 z-50 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-center cursor-default`}
       onClick={() => setShowTips(false)}
     >
       <div
@@ -40,26 +43,30 @@ const Tips = ({
           <AiOutlineClose />
         </button>
         <h2 className="text-2xl font-semibold mb-4">Keyboard Shortcuts</h2>
-        <table className="table-auto w-full border-collapse">
-          <thead>
-            <tr className="bg-blue-700">
-              <th className="px-4 py-2 border border-gray-300">Shortcut</th>
-              <th className="px-4 py-2 border border-gray-300">Description</th>
-            </tr>
-          </thead>
-          <tbody>
-            {shortcuts.map((shortcut, index) => (
-              <tr key={index} className="odd:bg-blue-500">
-                <td className="px-4 py-2 border border-gray-300">
-                  {shortcut.shortcut}
-                </td>
-                <td className="px-4 py-2 border border-gray-300">
-                  {shortcut.description}
-                </td>
+        <div className="max-h-96 overflow-y-auto">
+          <table className="table-auto w-full border-collapse">
+            <thead>
+              <tr className="bg-blue-700">
+                <th className="px-4 py-2 border border-gray-300">Shortcut</th>
+                <th className="px-4 py-2 border border-gray-300">
+                  Description
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {shortcuts.map((shortcut, index) => (
+                <tr key={index} className="odd:bg-blue-500">
+                  <td className="px-4 py-2 border border-gray-300">
+                    {shortcut.shortcut}
+                  </td>
+                  <td className="px-4 py-2 border border-gray-300">
+                    {shortcut.description}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
