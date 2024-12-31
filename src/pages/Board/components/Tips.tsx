@@ -8,7 +8,8 @@ const Tips = ({
   setShowTips: (show: boolean) => void;
 }) => {
   const shortcuts = [
-    { shortcut: 'Delete', description: 'Delete selected text' },
+    { shortcut: 'Delete', description: 'Delete selected element' },
+    { shortcut: 'T', description: 'toggle tools' },
     { shortcut: 'P', description: 'Select Pen tool' },
     { shortcut: 'E', description: 'Select Eraser tool' },
     { shortcut: 'A', description: 'Select Text tool' },
@@ -18,11 +19,12 @@ const Tips = ({
     { shortcut: '<', description: 'Increase the brush size' },
     { shortcut: '>', description: 'Decrease the brush size' },
     { shortcut: 'F11', description: 'Toggle full screen mode' },
-    { shortcut: 'Esc', description: 'Close the current dialog' },
+    { shortcut: 'Ctrl + S', description: 'Export as image' },
     { shortcut: 'Ctrl + Z', description: 'Undo the last action' },
     { shortcut: 'Ctrl + X', description: 'Redo the last action' },
     { shortcut: 'C', description: 'Clear the canova' },
-    { shortcut: '?', description: 'Toggle the help tips' },
+    { shortcut: '?', description: 'Open help tips' },
+    { shortcut: 'Esc', description: 'Close the current dialog' },
   ];
 
   return (

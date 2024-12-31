@@ -1,9 +1,24 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Stage, Layer, Line, Text as KonvaText, Rect } from 'react-konva';
+import Konva from 'konva';
+import { KonvaEventObject } from 'konva/lib/Node';
+import {
+  Stage,
+  Layer,
+  Line,
+  Text as KonvaText,
+  Rect,
+  Arrow,
+} from 'react-konva';
+
+/* Import Components */
 import DrawToolsBox from './DrawToolsBox';
 import { Modal, ModalButton, ModalInput } from '../../../components/Modal';
+import DrawToolsSettings from './DrawToolsSettings';
+import Tips from './Tips';
+import { Share, ShareButton } from '../../../components/ShareTools';
 
+/* Import Icons */
 import {
   FaTrash,
   FaUndo,
@@ -11,10 +26,7 @@ import {
   FaSearchPlus,
   FaSearchMinus,
 } from 'react-icons/fa';
-import { KonvaEventObject } from 'konva/lib/Node';
-import Konva from 'konva';
-import DrawToolsSettings from './DrawToolsSettings';
-import Tips from './Tips';
+import { AiFillFileImage } from 'react-icons/ai';
 
 const DOUBLE_CLICK_DELAY = 300;
 
@@ -23,6 +35,7 @@ const DrawBoard = () => {
   const stageRef = useRef<Konva.Stage>(null);
   const [searchParams] = useSearchParams();
   const boardId = searchParams.get('id') || '';
+  const [isShareOpen, setIsShareOpen] = useState(false);
 
   const [tool, setTool] = useState('default');
   const [redoStack, setRedoStack] = useState<
@@ -51,8 +64,21 @@ const DrawBoard = () => {
     return savedData ? JSON.parse(savedData).texts || [] : [];
   });
   const [isEditingText, setIsEditingText] = useState(false);
-  const [tempText, setTempText] = useState('');
+  const [tempText, setTempText] = useState<string | null>(null);
   const [selectedTextId, setSelectedTextId] = useState<string | null>(null);
+
+  // New state for arrow elements
+  const [arrows, setArrows] = useState(() => {
+    if (!boardId) return []; // If no board ID, return an empty array
+    const savedData = localStorage.getItem(boardId);
+    return savedData ? JSON.parse(savedData).arrows || [] : [];
+  });
+  const [selectedElementId, setSelectedElementId] = useState<string | null>(
+    null
+  );
+  const [selectedElementType, setSelectedElementType] = useState<string | null>(
+    null
+  );
 
   useEffect(() => {
     // Load data on initial render
@@ -62,6 +88,7 @@ const DrawBoard = () => {
         const parsedData = JSON.parse(savedData);
         setLines(parsedData.lines || []);
         setTexts(parsedData.texts || []);
+        setArrows(parsedData.arrows || []);
       }
     };
 
@@ -77,12 +104,13 @@ const DrawBoard = () => {
       const boardData = {
         lines,
         texts,
+        arrows,
       };
       localStorage.setItem(boardId, JSON.stringify(boardData));
     };
 
     saveData();
-  }, [lines, texts, boardId]);
+  }, [lines, texts, arrows, boardId]);
 
   /* Modal Functions */
   const handleCLoseClearModal = () => {
@@ -136,6 +164,7 @@ const DrawBoard = () => {
     setLines([]);
     setRedoStack([]);
     setTexts([]);
+    setArrows([]);
     setIsClearModalOpen(false);
   };
 
@@ -163,7 +192,7 @@ const DrawBoard = () => {
   }, []);
 
   const ZOOM_STEP = 0.1;
-  const MIN_ZOOM = 0.5;
+  const MIN_ZOOM = 0.1;
   const MAX_ZOOM = 3;
 
   // Zoom handler
@@ -218,27 +247,30 @@ const DrawBoard = () => {
   // Start drawing
   const handleMouseDown = useCallback(() => {
     handleRest();
+    const stage = stageRef.current;
+    const point = stage?.getPointerPosition();
+    if (!point || !stage) return;
+
+    const scale = stage.scaleX(); // Assume uniform scaling
+    const offsetX = stage.x();
+    const offsetY = stage.y();
+
+    // Translate pointer position to canvas coordinates
+    const translatedPoint = {
+      x: (point.x - (offsetX ?? 0)) / (scale ?? 1),
+      y: (point.y - (offsetY ?? 0)) / (scale ?? 1),
+    };
+
+    setRedoStack([]); // Clear redo stack on new action
+
     if (tool === 'pen' || tool === 'eraser') {
       isDrawing.current = true;
-      const stage = stageRef.current;
-      const point = stage?.getPointerPosition();
-      if (!point) return;
-      if (!stage) return;
-      const scale = stage.scaleX(); // Assume uniform scaling
-      const offsetX = stage.x();
-      const offsetY = stage.y();
-
-      // Translate pointer position to canvas coordinates
-      const translatedPoint = {
-        x: (point.x - (offsetX ?? 0)) / (scale ?? 1),
-        y: (point.y - (offsetY ?? 0)) / (scale ?? 1),
-      };
-
-      setRedoStack([]); // Clear redo stack on new action
       setLines(
         (
           prevLines: {
             tool: string;
+            id: string;
+            type: string;
             color: string;
             strokeWidth: number;
             points: number[];
@@ -247,6 +279,8 @@ const DrawBoard = () => {
           ...prevLines,
           {
             tool,
+            id: `${Date.now()}`,
+            type: 'pen',
             color,
             strokeWidth: allSize,
             points: [translatedPoint.x, translatedPoint.y],
@@ -255,24 +289,40 @@ const DrawBoard = () => {
       );
     }
 
+    if (tool === 'line') {
+      isDrawing.current = true;
+      setArrows(
+        (
+          prevArrows: {
+            id: string;
+            type: string;
+            color: string;
+            strokeWidth: number;
+            points: number[];
+          }[]
+        ) => [
+          ...prevArrows,
+          {
+            id: `${Date.now()}`,
+            type: 'line',
+            color,
+            strokeWidth: allSize,
+            points: [
+              translatedPoint.x,
+              translatedPoint.y,
+              translatedPoint.x,
+              translatedPoint.y,
+            ], // Start and end at the same point initially
+          },
+        ]
+      );
+    }
+
     if (tool === 'text') {
-      const stage = stageRef.current;
-      const point = stage?.getPointerPosition();
-      if (!point) return;
-      if (!stage) return;
-
-      const scale = stage.scaleX();
-      const offsetX = stage.x();
-      const offsetY = stage.y();
-
-      const translatedPoint = {
-        x: (point.x - (offsetX ?? 0)) / (scale ?? 1),
-        y: (point.y - (offsetY ?? 0)) / (scale ?? 1),
-      };
-
-      // Add new text element
+      // Text logic remains the same
       const newText = {
-        id: `${Date.now()}`, // Unique ID for text
+        id: `${Date.now()}`,
+        type: 'text',
         text: 'Double click to edit',
         x: translatedPoint.x,
         y: translatedPoint.y,
@@ -284,6 +334,7 @@ const DrawBoard = () => {
         (
           prevTexts: {
             id: string;
+            type: string;
             text: string;
             x: number;
             y: number;
@@ -302,41 +353,73 @@ const DrawBoard = () => {
 
     const stage = stageRef.current;
     const point = stage?.getPointerPosition();
-    if (!point) return;
+    if (!point || !stage) return;
 
-    const scale = stage?.scaleX(); // Assume uniform scaling
-    const offsetX = stage?.x();
-    const offsetY = stage?.y();
+    const scale = stage.scaleX(); // Assume uniform scaling
+    const offsetX = stage.x();
+    const offsetY = stage.y();
 
-    // Translate pointer position to canvas coordinates
     const translatedPoint = {
       x: (point.x - (offsetX ?? 0)) / (scale ?? 1),
       y: (point.y - (offsetY ?? 0)) / (scale ?? 1),
     };
 
-    setLines(
-      (
-        prevLines: {
-          tool: string;
-          color: string;
-          strokeWidth: number;
-          points: number[];
-        }[]
-      ) => {
-        const lastLine = prevLines[prevLines.length - 1];
-        const updatedLine = {
-          ...lastLine,
-          points: [...lastLine.points, translatedPoint.x, translatedPoint.y],
-        };
-        return [...prevLines.slice(0, -1), updatedLine];
-      }
-    );
-  }, []);
+    if (tool === 'pen' || tool === 'eraser') {
+      setLines(
+        (
+          prevLines: {
+            tool: string;
+            color: string;
+            strokeWidth: number;
+            points: number[];
+          }[]
+        ) => {
+          const lastLine = prevLines[prevLines.length - 1];
+          const updatedLine = {
+            ...lastLine,
+            points: [...lastLine.points, translatedPoint.x, translatedPoint.y],
+          };
+          return [...prevLines.slice(0, -1), updatedLine];
+        }
+      );
+    }
+
+    if (tool === 'line') {
+      setArrows(
+        (
+          prevArrows: {
+            id: string;
+            color: string;
+            strokeWidth: number;
+            points: number[];
+          }[]
+        ) => {
+          const lastArrow = prevArrows[prevArrows.length - 1];
+          if (!lastArrow) return prevArrows;
+
+          const updatedArrow = {
+            ...lastArrow,
+            points: [
+              lastArrow.points[0],
+              lastArrow.points[1],
+              translatedPoint.x,
+              translatedPoint.y,
+            ],
+          };
+
+          return [...prevArrows.slice(0, -1), updatedArrow];
+        }
+      );
+    }
+  }, [tool]);
 
   // End drawing
   const handleMouseUp = useCallback(() => {
     isDrawing.current = false;
-  }, []);
+    if (tool === 'line') {
+      setTool('default');
+    }
+  }, [tool]);
 
   const handleRest = () => {
     setSelectedTextId(null);
@@ -398,8 +481,22 @@ const DrawBoard = () => {
     }
   };
 
+  const handleElementClick = useCallback(
+    (id: string, elementType: string) => {
+      if (tool !== 'default') return;
+      if (clickTimeout.current) {
+        clearTimeout(clickTimeout.current);
+      }
+
+      console.log(id);
+      setSelectedElementId(id);
+      setSelectedElementType(elementType);
+    },
+    [tool]
+  );
+
   useEffect(() => {
-    const handleTextDelete = () => {
+    const handelItemDelete = () => {
       if (selectedTextId) {
         setTexts(
           (
@@ -415,6 +512,41 @@ const DrawBoard = () => {
         );
         setSelectedTextId(null);
       }
+
+      if (selectedElementId) {
+        switch (selectedElementType) {
+          case 'arrow':
+            setArrows(
+              (
+                prevArrows: {
+                  id: string;
+                  color: string;
+                  strokeWidth: number;
+                  points: number[];
+                }[]
+              ) => prevArrows.filter((arrow) => arrow.id !== selectedElementId)
+            );
+            break;
+
+          case 'pen':
+            setLines(
+              (
+                prevLines: {
+                  id: string;
+                  color: string;
+                  strokeWidth: number;
+                  points: number[];
+                }[]
+              ) => prevLines.filter((line) => line.id !== selectedElementId)
+            );
+            break;
+
+          default:
+            console.warn('Unknown element type:', selectedElementType);
+        }
+
+        setSelectedElementId(null); // Clear the selected element ID after handling
+      }
     };
 
     const handleKeydown = (e: KeyboardEvent) => {
@@ -425,8 +557,14 @@ const DrawBoard = () => {
         case e.ctrlKey && e.key.toLowerCase() === 'x':
           handleRedo(); // Call the redo function
           break;
+        case e.ctrlKey && e.key.toLowerCase() === 's':
+          e.preventDefault(); // Prevent the default save action
+          handleDownload(); // Call the download function
+          break;
         case e.key.toLowerCase() === 'c':
-          setIsClearModalOpen(true); // Open the clear modal
+          if (lines.length > 0 || texts.length > 0 || arrows.length > 0) {
+            setIsClearModalOpen(true); // Open the clear modal
+          }
           break;
         case e.key.toLowerCase() === 'escape':
           setShowTips(false); // Close the tips modal
@@ -435,8 +573,7 @@ const DrawBoard = () => {
           setShowTips(true); // Open the tips modal
           break;
         case e.key.toLowerCase() === 'delete':
-          console.log('Delete key pressed');
-          handleTextDelete(); // Delete the selected text
+          handelItemDelete(); // Delete the selected text
           break;
         default:
           break;
@@ -448,7 +585,55 @@ const DrawBoard = () => {
     return () => {
       window.removeEventListener('keydown', handleKeydown);
     };
-  }, [isEditingText, selectedTextId]);
+  }, [
+    isEditingText,
+    selectedTextId,
+    arrows.length,
+    lines.length,
+    texts.length,
+    selectedElementType,
+    selectedElementId,
+  ]);
+
+  const handleDownload = () => {
+    if (stageRef.current) {
+      const stage = stageRef.current;
+      const scale = stage.scaleX(); // Assuming uniform scaling for both X and Y
+      const position = stage.position();
+      const stageWidth = stage.width();
+      const stageHeight = stage.height();
+
+      // Create a temporary layer for the white background
+      const whiteBgLayer = new Konva.Layer();
+
+      // Adjust the rectangle to cover the scaled and panned canvas
+      const whiteBgRect = new Konva.Rect({
+        x: -position.x / scale, // Adjust for panning and scaling
+        y: -position.y / scale,
+        width: stageWidth / scale, // Scale the width and height
+        height: stageHeight / scale,
+        fill: 'white',
+      });
+
+      whiteBgLayer.add(whiteBgRect);
+
+      // Temporarily add the white background to the stage
+      stage.add(whiteBgLayer);
+      whiteBgLayer.moveToBottom(); // Ensure it's at the bottom
+
+      // Generate the data URL with the white background
+      const dataURL = stage.toDataURL({ pixelRatio: 2 }); // Higher pixelRatio for better quality
+
+      // Remove the temporary white background layer
+      whiteBgLayer.destroy();
+
+      // Trigger the download
+      const link = document.createElement('a');
+      link.download = 'canvas-image.png';
+      link.href = dataURL;
+      link.click();
+    }
+  };
 
   return (
     <div
@@ -461,30 +646,47 @@ const DrawBoard = () => {
         isKeyboardShortcutsDisable={isEditingText}
       />
 
+      <Share
+        isOpen={isShareOpen}
+        onClick={() => setIsShareOpen(!isShareOpen)}
+        className="fixed top-10 right-12"
+      >
+        <ShareButton
+          onClick={handleDownload}
+          className="flex gap-2 bg-white text-black px-4 py-2 rounded-lg shadow-md"
+        >
+          <AiFillFileImage
+            className="text-blue-500 text-2xl"
+            title="Export as Image"
+          />
+        </ShareButton>
+      </Share>
+
       <Stage
         ref={stageRef}
         width={stageSize.width}
         height={stageSize.height}
+        color="white"
         draggable={tool === 'hand'} // Enable dragging only in "hand" mode
         onWheel={handleWheel} // Attach wheel event for zoom
         onMouseDown={handleMouseDown}
         onMousemove={handleMouseMove}
         onMouseup={handleMouseUp}
         onClick={handleRest}
+        onContextMenu={(e) => e.evt.preventDefault()} // Prevent context menu
       >
         <Layer>
           {lines.map(
-            (
-              line: {
-                tool: string;
-                color: string;
-                strokeWidth: number;
-                points: number[];
-              },
-              i: number
-            ) => (
+            (line: {
+              tool: string;
+              id: string;
+              color: string;
+              strokeWidth: number;
+              points: number[];
+              type: string;
+            }) => (
               <Line
-                key={i}
+                key={line.id}
                 points={line.points}
                 stroke={line.color}
                 strokeWidth={line.strokeWidth}
@@ -494,6 +696,33 @@ const DrawBoard = () => {
                 globalCompositeOperation={
                   line.tool === 'eraser' ? 'destination-out' : 'source-over'
                 }
+                onClick={() => {
+                  handleElementClick(line.id, line.type);
+                }}
+              />
+            )
+          )}
+
+          {/* Render Arrows */}
+          {arrows.map(
+            (arrow: {
+              id: string;
+              color: string;
+              strokeWidth: number;
+              points: number[];
+              type: string;
+            }) => (
+              <Arrow
+                type={arrow.type}
+                key={arrow.id}
+                points={arrow.points}
+                stroke={arrow.color}
+                strokeWidth={arrow.strokeWidth}
+                pointerLength={200} // Length of the arrowhead
+                pointerWidth={120} // Width of the arrowhead
+                lineCap="round"
+                lineJoin="round"
+                onClick={() => handleElementClick(arrow.id, 'arrow')}
               />
             )
           )}
@@ -501,6 +730,7 @@ const DrawBoard = () => {
           {texts.map(
             (text: {
               id: string;
+              type: string;
               text: string;
               x: number;
               y: number;
@@ -524,6 +754,7 @@ const DrawBoard = () => {
                 {/* Actual text */}
                 <KonvaText
                   key={text.id}
+                  type={text.type}
                   text={text.text}
                   fontSize={text.fontSize}
                   x={text.x}
@@ -649,13 +880,15 @@ const DrawBoard = () => {
 
         {/* Clear Button */}
         <button
-          className={`bg-red-500 text-white p-2 rounded-full shadow-md hover:bg-red-600 transition-all ${
-            lines.length === 0 && texts.length === 0
+          className={` text-white p-2 rounded-full shadow-md hover:bg-red-600 transition-all ${
+            lines.length === 0 && texts.length === 0 && arrows.length === 0
               ? 'bg-gray-400 hover:bg-gray-400'
-              : ''
+              : 'bg-red-500'
           }`}
           onClick={() => setIsClearModalOpen(true)}
-          disabled={lines.length === 0 && texts.length === 0}
+          disabled={
+            lines.length === 0 && texts.length === 0 && arrows.length === 0
+          }
           aria-label="Clear Canvas"
           title="Clear Canvas"
         >
@@ -663,9 +896,9 @@ const DrawBoard = () => {
         </button>
       </div>
 
-      <div>
+      <div className="fixed bottom-4 left-4">
         <button
-          className="fixed bottom-4 left-4 bg-blue-500 text-white w-12 h-8 rounded-sm  shadow-md hover:bg-blue-600 transition-all"
+          className=" bg-blue-500 text-white w-12 h-8 rounded-sm  shadow-md hover:bg-blue-600 transition-all"
           onClick={() => setShowTips(true)}
           aria-label="Show Keyboard Shortcuts"
           title="Show Keyboard Shortcuts"
@@ -704,7 +937,7 @@ const DrawBoard = () => {
       <Modal title="" isOpen={isEditingText} onClose={handleCLoseEditTextModal}>
         <ModalInput
           placeholder="Enter text here"
-          value={tempText}
+          value={tempText || ''}
           onChange={(e) => setTempText(e.target.value)}
           onEnter={handleTextEdit}
         />
