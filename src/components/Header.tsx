@@ -118,8 +118,8 @@ const Header = () => {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden">
-          <nav className="fixed top-0 right-0 w-3/4 h-full bg-white p-6 flex flex-col gap-6 z-50">
+        <div className="fixed inset-0 bg-blue-400 w-screen h-screen bg-opacity-80 z-40 md:hidden">
+          <nav className="fixed top-0 right-0 h-screen w-screen p-6 flex flex-col gap-6 z-50">
             <button
               onClick={closeMenu}
               aria-label="Close menu"
@@ -127,7 +127,7 @@ const Header = () => {
             >
               <FaTimes />
             </button>
-            <ul className="flex flex-col gap-6 items-center mt-10">
+            <ul className="flex flex-col gap-6 items-center mt-10  w-full">
               {navElements.map((navItem, index) => (
                 <li key={index}>
                   <ScrollLink

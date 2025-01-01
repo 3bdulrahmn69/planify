@@ -7,6 +7,7 @@ import {
   DropdownButton,
 } from '../../../components/DropdownMenu';
 import { Modal, ModalInput, ModalButton } from '../../../components/Modal';
+import { cn } from '../../../lib/utils';
 
 import { FaRegEdit, FaTrash } from 'react-icons/fa';
 import { MdDraw, MdTaskAlt } from 'react-icons/md';
@@ -16,9 +17,10 @@ interface BoardCardProps {
   id: string;
   type: string;
   date: string;
+  className?: string;
 }
 
-const BoardCard = ({ name, id, date, type }: BoardCardProps) => {
+const BoardCard = ({ name, id, date, type, className }: BoardCardProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [tempBoardName, setTempBoardName] = useState(name);
   const [isBoardModalOpen, setIsBoardModalOpen] = useState(false);
@@ -39,7 +41,12 @@ const BoardCard = ({ name, id, date, type }: BoardCardProps) => {
   };
 
   return (
-    <div className="relative h-56 w-full max-w-md sm:w-96 rounded-lg bg-gradient-to-br from-yellow-300 to-yellow-400 shadow-lg hover:shadow-2xl transition-transform duration-300 ease-in-out transform hover:scale-105 overflow-hidden">
+    <div
+      className={cn(
+        'relative h-56 w-full max-w-md sm:w-96 rounded-lg bg-gradient-to-br from-yellow-300 to-yellow-400 shadow-lg hover:shadow-2xl transition-transform duration-300 ease-in-out transform hover:scale-105 overflow-hidden',
+        className
+      )}
+    >
       {/* Dropdown Button */}
       <DropdownButton
         isMenuOpen={isMenuOpen}

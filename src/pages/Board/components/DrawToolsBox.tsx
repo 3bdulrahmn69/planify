@@ -4,12 +4,11 @@ import {
   FaPen,
   FaEraser,
   FaDrawPolygon,
-  FaShapes,
-  FaImage,
   FaArrowRight,
   FaArrowLeft,
+  FaCircle,
 } from 'react-icons/fa';
-import { IoText } from 'react-icons/io5';
+import { IoText, IoSquare } from 'react-icons/io5';
 
 interface DrawToolsBoxProps {
   tool: string | null;
@@ -82,10 +81,10 @@ const DrawToolsBox = ({
           handleToolChange('line');
           break;
         case 's':
-          handleToolChange('shapes');
+          handleToolChange('square');
           break;
         case 'i':
-          handleToolChange('image');
+          handleToolChange('circle');
           break;
         case 't':
           toggleToolBox();
@@ -173,7 +172,7 @@ const DrawToolsBox = ({
             tool === 'eraser' ? 'bg-blue-500' : ''
           } hover:scale-110 hover:border-blue-500 border-2`}
           onClick={handleClick('eraser')}
-          title='Eraser Tool'
+          title="Eraser Tool"
         >
           <FaEraser size={18} />
         </button>
@@ -203,27 +202,27 @@ const DrawToolsBox = ({
         </button>
 
         <button
-          aria-label="Shapes Tool"
+          aria-label="Square Tool"
           tabIndex={0}
-          className={`absolute top-56 left-12 bg-black rounded-full flex items-center justify-center w-9 h-9 text-white transition-transform ${
-            tool === 'shapes' ? 'bg-blue-500' : ''
+          className={`absolute top-56 left-12 bg-black rounded-full hidden items-center justify-center w-9 h-9 text-white transition-transform ${
+            tool === 'square' ? 'bg-blue-500' : ''
           } hover:scale-110 hover:border-blue-500 border-2`}
-          onClick={handleClick('shapes')}
-          title="Shapes Tool"
+          onClick={handleClick('square')}
+          title="Square Tool"
         >
-          <FaShapes size={18} />
+          <IoSquare size={18} />
         </button>
 
         <button
-          aria-label="Image Tool"
+          aria-label="Triangle Tool"
           tabIndex={0}
-          className={`absolute top-64 left-2 bg-black rounded-full flex items-center justify-center w-9 h-9 text-white transition-transform ${
-            tool === 'image' ? 'bg-blue-500' : ''
+          className={`absolute top-64 left-2 bg-black rounded-full hidden items-center justify-center w-9 h-9 text-white transition-transform ${
+            tool === 'triangle' ? 'bg-blue-500' : ''
           } hover:scale-110 hover:border-blue-500 border-2`}
-          onClick={handleClick('image')}
-          title="upload Image"
+          onClick={handleClick('triangle')}
+          title="Triangle Tool"
         >
-          <FaImage size={18} />
+          <FaCircle size={18} />
         </button>
       </div>
     </div>

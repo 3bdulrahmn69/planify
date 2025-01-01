@@ -9,7 +9,7 @@ const HeroSection = () => {
       className="w-full h-[calc(100vh-80px)] flex items-center justify-around bg-gradient-to-b from-gray-50 to-gray-200"
     >
       {/* Text and Call to Action */}
-      <div className="w-3/12 h-3/4 flex flex-col justify-center">
+      <div className="w-11/12 md:w-3/12 h-3/4 flex flex-col justify-center">
         <h1 className="text-5xl pb-2 font-semibold bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent inline-block leading-tight">
           Planify
         </h1>
@@ -25,7 +25,7 @@ const HeroSection = () => {
       </div>
 
       {/* Features Section */}
-      <div className="w-4/12 h-3/4 flex flex-col gap-4">
+      <div className="md:w-4/12 h-3/4 hidden md:flex flex-col gap-4">
         {/* Top Feature */}
         <div className="w-full h-1/3 bg-slate-700 rounded-lg flex items-center justify-center text-white border-4 border-black shadow-md">
           <img
@@ -50,7 +50,7 @@ const HeroSection = () => {
       </div>
 
       {/* Promo or App Preview */}
-      <div className="w-2/12 bg-black h-3/4 rounded-lg flex items-center justify-center text-white p-4 shadow-lg">
+      <div className="w-2/12 bg-black h-3/4 rounded-lg hidden md:flex  items-center justify-center text-white p-4 shadow-lg">
         <p className="text-center">Planify App Preview</p>
       </div>
     </section>

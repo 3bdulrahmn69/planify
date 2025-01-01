@@ -49,7 +49,7 @@ export const Section = ({ id, className, children }: SectionProps) => {
       id={id}
       className={cn('container mx-auto py-8 px-4 md:px-8', className)}
     >
-      <div className="section-content">{children}</div>
+      {children}
     </section>
   );
 };

@@ -7,6 +7,7 @@ import PlusButton from '../../components/PlusButton';
 import CreateBtn from './components/CreateBtn';
 
 import { MdDraw, MdTaskAlt } from 'react-icons/md';
+import Spinner from '../../components/Spinner';
 
 const BoardCard = lazy(() => import('./components/BoardCard')); // Lazy load BoardCard
 
@@ -43,36 +44,35 @@ const Dashboard = () => {
       <main className="w-full">
         <Section
           id="board-manager"
-          className="mt-24 flex flex-col items-center w-full px-4 sm:px-8"
+          className="mt-24 flex flex-col items-center w-full px-4 sm:px-4"
         >
           <Title className="mb-6 text-center text-xl sm:text-2xl lg:text-3xl">
             Your Boards
           </Title>
 
           <div
-            className={`w-full max-w-7xl flex flex-wrap justify-start gap-6 ${
-              boards.length > 0 ? '' : 'items-center justify-center'
+            className={`w-full max-w-7xl grid grid-cols-3 gap-6 ${
+              boards.length > 0 ? '' : 'flex items-center justify-center'
             }`}
           >
-            <Suspense
-              fallback={
-                <div className="text-center col-span-full">
-                  <p>Loading boards...</p>
-                </div>
-              }
-            >
+            <Suspense fallback={<Spinner />}>
               {boards.length > 0 ? (
-                boards.map((board) => (
-                  <BoardCard
-                    key={board.id}
-                    id={board.id}
-                    name={board.name}
-                    date={board.date}
-                    type={board.type}
-                  />
-                ))
+                boards.map((board, i) => {
+                  // Generate a random boolean value for flex-grow
+                  const randomGrow = i === 0; // Only the first board will grow (for example)
+                  return (
+                    <BoardCard
+                      key={board.id}
+                      id={board.id}
+                      name={board.name}
+                      date={board.date}
+                      type={board.type}
+                      className={`${randomGrow ? 'flex-grow' : ''}`}
+                    />
+                  );
+                })
               ) : (
-                <div className="mt-24 text-gray-500 text-lg flex flex-col items-center justify-center">
+                <div className="w-full h-full flex flex-col items-center justify-center mt-24 text-gray-500 text-lg absolute inset-0 top-16">
                   <p>No boards found. Create one now!</p>
                   <CreateBtn
                     title="Create New Board"
