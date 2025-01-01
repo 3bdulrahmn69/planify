@@ -304,7 +304,7 @@ const DrawBoard = () => {
           ...prevArrows,
           {
             id: `${Date.now()}`,
-            type: 'line',
+            type: 'arrow',
             color,
             strokeWidth: allSize,
             points: [
@@ -422,7 +422,9 @@ const DrawBoard = () => {
   }, [tool]);
 
   const handleRest = () => {
+    console.log('rest');
     setSelectedTextId(null);
+    setSelectedElementId(null);
   };
 
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -696,7 +698,8 @@ const DrawBoard = () => {
                 globalCompositeOperation={
                   line.tool === 'eraser' ? 'destination-out' : 'source-over'
                 }
-                onClick={() => {
+                onClick={(e) => {
+                  e.cancelBubble = true; // Prevent stage click event
                   handleElementClick(line.id, line.type);
                 }}
               />
@@ -722,7 +725,10 @@ const DrawBoard = () => {
                 pointerWidth={120} // Width of the arrowhead
                 lineCap="round"
                 lineJoin="round"
-                onClick={() => handleElementClick(arrow.id, 'arrow')}
+                onClick={(e) => {
+                  e.cancelBubble = true; // Prevent stage click event
+                  handleElementClick(arrow.id, arrow.type);
+                }}
               />
             )
           )}
