@@ -159,12 +159,12 @@ const DrawBoard = () => {
     });
   };
 
-  // Clear all lines with confirmation
+  // Clear all elements from the canvas
   const handleClear = () => {
     setLines([]);
-    setRedoStack([]);
     setTexts([]);
     setArrows([]);
+    setRedoStack([]);
     setIsClearModalOpen(false);
   };
 
@@ -183,6 +183,10 @@ const DrawBoard = () => {
   };
 
   // Update stage size on window resize
+  const ZOOM_STEP = 0.1;
+  const MIN_ZOOM = 0.1;
+  const MAX_ZOOM = 3;
+
   useEffect(() => {
     const handleResize = () => {
       setStageSize({ width: window.innerWidth, height: window.innerHeight });
@@ -190,10 +194,6 @@ const DrawBoard = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-
-  const ZOOM_STEP = 0.1;
-  const MIN_ZOOM = 0.1;
-  const MAX_ZOOM = 3;
 
   // Zoom handler
   const handleWheel = useCallback((e: KonvaEventObject<WheelEvent>) => {
@@ -243,6 +243,10 @@ const DrawBoard = () => {
     stage.scale({ x: scale, y: scale });
     stage.batchDraw();
   }, [scale]);
+
+  const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setScale(Number(e.target.value));
+  };
 
   // Start drawing
   const handleMouseDown = useCallback(() => {
@@ -422,13 +426,8 @@ const DrawBoard = () => {
   }, [tool]);
 
   const handleRest = () => {
-    console.log('rest');
     setSelectedTextId(null);
     setSelectedElementId(null);
-  };
-
-  const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setScale(Number(e.target.value));
   };
 
   const clickTimeout = useRef<number | null>(null);
@@ -669,7 +668,7 @@ const DrawBoard = () => {
         width={stageSize.width}
         height={stageSize.height}
         color="white"
-        draggable={tool === 'hand'} // Enable dragging only in "hand" mode
+        draggable={tool === 'hand'}
         onWheel={handleWheel} // Attach wheel event for zoom
         onMouseDown={handleMouseDown}
         onMousemove={handleMouseMove}
