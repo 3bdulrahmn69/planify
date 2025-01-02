@@ -703,7 +703,6 @@ const DrawBoard = () => {
             )
           )}
 
-          {/* Render Arrows */}
           {arrows.map(
             (arrow: {
               id: string;
@@ -711,23 +710,44 @@ const DrawBoard = () => {
               strokeWidth: number;
               points: number[];
               type: string;
-            }) => (
-              <Arrow
-                type={arrow.type}
-                key={arrow.id}
-                points={arrow.points}
-                stroke={arrow.color}
-                strokeWidth={arrow.strokeWidth}
-                pointerLength={200} // Length of the arrowhead
-                pointerWidth={120} // Width of the arrowhead
-                lineCap="round"
-                lineJoin="round"
-                onClick={(e) => {
-                  e.cancelBubble = true; // Prevent stage click event
-                  handleElementClick(arrow.id, arrow.type);
-                }}
-              />
-            )
+            }) => {
+              // Calculate the arrow length
+              const calculateArrowLength = (points: number[]) => {
+                let totalLength = 0;
+                for (let i = 0; i < points.length - 2; i += 2) {
+                  const x1 = points[i];
+                  const y1 = points[i + 1];
+                  const x2 = points[i + 2];
+                  const y2 = points[i + 3];
+                  totalLength += Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+                }
+                return totalLength;
+              };
+
+              const arrowLength = calculateArrowLength(arrow.points);
+
+              // Dynamically set pointerLength and pointerWidth
+              const pointerLength = Math.max(10, arrowLength * 0.1); // Minimum 10, 10% of arrow length
+              const pointerWidth = Math.max(5, arrowLength * 0.08); // Minimum 5, 6% of arrow length
+
+              return (
+                <Arrow
+                  type={arrow.type}
+                  key={arrow.id}
+                  points={arrow.points}
+                  stroke={arrow.color}
+                  strokeWidth={arrow.strokeWidth}
+                  pointerLength={pointerLength}
+                  pointerWidth={pointerWidth}
+                  lineCap="round"
+                  lineJoin="round"
+                  onClick={(e) => {
+                    e.cancelBubble = true; // Prevent stage click event
+                    handleElementClick(arrow.id, arrow.type);
+                  }}
+                />
+              );
+            }
           )}
 
           {texts.map(
