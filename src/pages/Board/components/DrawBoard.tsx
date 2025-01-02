@@ -533,7 +533,9 @@ const DrawBoard = () => {
             setLines(
               (
                 prevLines: {
+                  tool: string;
                   id: string;
+                  type: string;
                   color: string;
                   strokeWidth: number;
                   points: number[];
@@ -546,38 +548,32 @@ const DrawBoard = () => {
             console.warn('Unknown element type:', selectedElementType);
         }
 
-        setSelectedElementId(null); // Clear the selected element ID after handling
+        setSelectedElementId(null);
       }
     };
 
     const handleKeydown = (e: KeyboardEvent) => {
-      switch (!isEditingText) {
-        case e.ctrlKey && e.key.toLowerCase() === 'z':
-          handleUndo(); // Call the undo function
-          break;
-        case e.ctrlKey && e.key.toLowerCase() === 'x':
-          handleRedo(); // Call the redo function
-          break;
-        case e.ctrlKey && e.key.toLowerCase() === 's':
+      const key = e.key.toLowerCase();
+
+      if (!isEditingText) {
+        if (e.ctrlKey && key === 'z') {
+          if (lines.length > 0) handleUndo();
+        } else if (e.ctrlKey && key === 'x') {
+          if (redoStack.length > 0) handleRedo();
+        } else if (e.ctrlKey && key === 's') {
           e.preventDefault(); // Prevent the default save action
-          handleDownload(); // Call the download function
-          break;
-        case e.key.toLowerCase() === 'c':
+          handleDownload();
+        } else if (e.ctrlKey && key === 'c') {
           if (lines.length > 0 || texts.length > 0 || arrows.length > 0) {
-            setIsClearModalOpen(true); // Open the clear modal
+            setIsClearModalOpen(true);
           }
-          break;
-        case e.key.toLowerCase() === 'escape':
-          setShowTips(false); // Close the tips modal
-          break;
-        case e.key.toLowerCase() === '?':
-          setShowTips(true); // Open the tips modal
-          break;
-        case e.key.toLowerCase() === 'delete':
-          handelItemDelete(); // Delete the selected text
-          break;
-        default:
-          break;
+        } else if (key === 'escape') {
+          if (showTips) setShowTips(false);
+        } else if (key === '?') {
+          if (showTips === false) setShowTips(true);
+        } else if (key === 'delete') {
+          if (selectedTextId || selectedElementId) handelItemDelete();
+        }
       }
     };
 
@@ -592,8 +588,10 @@ const DrawBoard = () => {
     arrows.length,
     lines.length,
     texts.length,
+    redoStack.length,
     selectedElementType,
     selectedElementId,
+    showTips,
   ]);
 
   const handleDownload = () => {

@@ -22,7 +22,7 @@ const Tips = ({
     { shortcut: 'Ctrl + S', description: 'Export as image' },
     { shortcut: 'Ctrl + Z', description: 'Undo the last action' },
     { shortcut: 'Ctrl + X', description: 'Redo the last action' },
-    { shortcut: 'C', description: 'Clear the canova' },
+    { shortcut: 'Ctrl + C', description: 'Clear the canova' },
     { shortcut: '?', description: 'Open help tips' },
     { shortcut: 'Esc', description: 'Close the current dialog' },
   ];
